@@ -202,6 +202,7 @@ export function registerSocketHandlers(io) {
     socket.on("typing:stop", () => {
       if (socket.currentRoom)
         socket.to(socket.currentRoom).emit("user:stopped", { name: user.name });
+    socket.on("ping", () => { socket.emit("pong"); });
     });
 
     /* disconnect */
