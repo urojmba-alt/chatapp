@@ -60,7 +60,7 @@ app.use((err, _req, res, _next) => {
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_ORIGIN || false, credentials: true },
+  cors: { origin: ["https://lonelinesskill.com", "http://localhost:3000"], credentials: true },
   connectionStateRecovery: { maxDisconnectionDuration: 2 * 60 * 1000 },
 });
 
