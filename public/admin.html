@@ -4,7 +4,7 @@
 <script>
 const B='https://chatapp-production-501c.up.railway.app';
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const tok=()=>localStorage.getItem('tcr_token');
+const tok=()=>{const u=new URLSearchParams(window.location.search).get('token');if(u){localStorage.setItem('tcr_token',u);return u;}return localStorage.getItem('tcr_token');};
 const af=(url,o={})=>{const t=tok();const h={...(o.headers||{}),...(t?{'x-auth-token':t}:{})};if(o.body)h['Content-Type']='application/json';return fetch(url,{...o,credentials:'include',headers:h});};
 document.getElementById('lu').onkeydown=e=>{if(e.key==='Enter')document.getElementById('lp').focus();};
 document.getElementById('lp').onkeydown=e=>{if(e.key==='Enter')li();};
