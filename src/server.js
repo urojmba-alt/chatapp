@@ -3,7 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import session from "express-session";
-import { RedisStore } from "connect-redis";
+import RedisStore from "connect-redis";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import { dirname, join } from "path";
