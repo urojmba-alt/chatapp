@@ -38,48 +38,6 @@ const sessionMiddleware = session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: p
-git pull && cat > src/server.js << 'SERVEREOF'
-import "dotenv/config";
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import session from "express-session";
-import RedisStore from "connect-redis";
-import cookieParser from "cookie-parser";
-import rateLimit from "express-rate-limit";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-
-import redis from "./lib/redis.js";
-import authRouter from "./routes/auth.js";
-import roomsRouter from "./routes/rooms.js";
-import { requireAuthSocket } from "./middleware/auth.js";
-import { registerSocketHandlers } from "./rooms/socket.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const ALLOWED = [
-  "https://lonelinesskill.com",
-  "https://www.lonelinesskill.com",
-  "http://localhost:3000",
-  "null"
-];
-
-const corsOptions = {
-  origin: function(origin, cb) { cb(null, true); },
-  credentials: true,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization","Cookie"]
-};
-
-const sessionMiddleware = session({
-  store: new RedisStore({ client: redis, prefix: "sess:" }),
-  secret: process.env.SESSION_SECRET || "dev-secret-CHANGE-IN-PROD",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
