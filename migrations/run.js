@@ -83,3 +83,20 @@ async function makeAdmin() {
   }
 }
 makeAdmin();
+
+async function addSessions() {
+  const pool2 = new (await import('pg')).default.Pool({ connectionString: process.env.DATABASE_URL });
+  try {
+    await pool2.query(`
+      CREATE TABLE IF NOT EXISTS sessions_tokens (
+        token TEXT PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '30 days',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    console.log("sessions_tokens table ready");
+  } catch(e) { console.error("sessions:", e.message); }
+  finally { await pool2.end(); }
+}
+addSessions();
