@@ -100,3 +100,23 @@ async function addSessions() {
   finally { await pool2.end(); }
 }
 addSessions();
+
+async function addMissingRooms() {
+  const {default: pg} = await import('pg');
+  const pool2 = new pg.Pool({connectionString: process.env.DATABASE_URL});
+  const rooms = [
+    ['music','Music & sound','🎵','#DB2777','You are a music theorist in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['psychology','Psychology & mind','🧘','#0891B2','You are a research psychologist in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['finance','Money & investing','💰','#059669','You are a financial analyst in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['fitness','Fitness & health','💪','#DC2626','You are a sports scientist in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['travel','Travel & places','✈️','#0284C7','You are a travel writer in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['science','Science & discovery','🔬','#6D28D9','You are a science communicator in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ['movies','Film & TV','🎬','#BE185D','You are a film critic in a live chat room. Keep replies 2-4 sentences. You were summoned with @ai.']
+  ];
+  for(const [id,name,icon,accent,sp] of rooms){
+    await pool2.query('INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',[id,name,icon,accent,sp]);
+    console.log('Room added:',id);
+  }
+  await pool2.end();
+}
+addMissingRooms();
