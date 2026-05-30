@@ -3,9 +3,250 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Topic Chat Rooms</title>
+<title>Admin Panel — Topic Chat Rooms</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0F0E17;--bg2:#1A1827;--bg3:#252338;--tx:#FFFFFE;--tx2:#A7A9BE;--tx3:#6B6D7C;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.16);--p:#6C3AED;--p2:#8B5CF6;--f:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{min-height:100%;font-family:var(--f);background:var(--bg);color:var(--tx)}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:100}
+#login.hidden{display:none}
+.lcard{width:100%;max-width:360px;background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:32px 28px;display:flex;flex-direction:column;gap:16px}
+.lcard h1{font-size:22px;font-weight:700;text-align:center;color:#fff}
+.lcard p{font-size:13px;color:var(--tx2);text-align:center}
+.lcard input{width:100%;padding:12px 14px;border:1px solid var(--bd2);border-radius:10px;font-size:14px;background:rgba(255,255,255,.06);color:#fff;outline:none;font-family:var(--f)}
+.lcard input:focus{border-color:var(--p2);box-shadow:0 0 0 3px rgba(108,58,237,.2)}
+.lcard input::placeholder{color:var(--tx3)}
+#lerr{font-size:12px;color:#F87171;text-align:center;min-height:18px}
+#lbtn{padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#6C3AED,#9333EA);color:#fff;font-family:var(--f)}
+#lbtn:hover{opacity:.9}#lbtn:disabled{opacity:.5;cursor:not-allowed}
+
+#app{display:none;min-height:100vh}
+#app.on{display:block}
+#topbar{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--bd);background:var(--bg2);position:sticky;top:0;z-index:10}
+#topbar h1{font-size:16px;font-weight:700;color:#fff;flex:1}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(108,58,237,.3);color:var(--p2)}
+#signout{font-size:12px;color:var(--tx3);background:rgba(255,255,255,.06);border:1px solid var(--bd);cursor:pointer;padding:6px 12px;border-radius:8px;font-family:var(--f)}
+#signout:hover{background:rgba(255,255,255,.1);color:var(--tx2)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:24px}
+.stat{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:20px;text-align:center}
+.stat-num{font-size:36px;font-weight:700;color:#fff;margin-bottom:4px}
+.stat-label{font-size:13px;color:var(--tx2)}
+
+.section{padding:0 24px 24px}
+.section h2{font-size:15px;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section h2 span{font-size:12px;color:var(--tx3);font-weight:400}
+.refresh-btn{margin-left:auto;font-size:12px;color:var(--p2);background:none;border:none;cursor:pointer;font-family:var(--f)}
+.refresh-btn:hover{color:var(--p)}
+
+table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:14px;overflow:hidden;border:1px solid var(--bd)}
+th{padding:10px 14px;font-size:11px;font-weight:600;color:var(--tx3);text-align:left;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
+td{padding:10px 14px;font-size:13px;color:var(--tx2);border-bottom:1px solid var(--bd)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.03)}
+.admin-badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(108,58,237,.3);color:var(--p2)}
+.del-btn{padding:4px 10px;border-radius:8px;font-size:12px;border:1px solid rgba(248,113,113,.3);color:#F87171;background:rgba(248,113,113,.1);cursor:pointer;font-family:var(--f);transition:all .15s}
+.del-btn:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
+.room-chip{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:500;background:rgba(108,58,237,.2);color:var(--p2)}
+.msg-content{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx)}
+.loading{text-align:center;padding:40px;color:var(--tx3);font-size:14px}
+.empty{text-align:center;padding:30px;color:var(--tx3);font-size:14px}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:1fr 1fr}
+  .section{padding:0 14px 20px}
+  .stats{padding:14px}
+  td,th{padding:8px 10px}
+}
+</style>
 </head>
 <body>
-<script>window.location.href='https://chatapp-production-501c.up.railway.app';</script>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lcard">
+    <h1>🔐 Admin Panel</h1>
+    <p>Sign in with your admin account</p>
+    <input id="lu" type="text" placeholder="Username" autocomplete="username"/>
+    <input id="lp" type="password" placeholder="Password" autocomplete="current-password"/>
+    <div id="lerr"></div>
+    <button id="lbtn" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="topbar">
+    <h1>⚡ Admin Panel</h1>
+    <span class="badge">Admin</span>
+    <span id="admin-name" style="font-size:13px;color:var(--tx2)"></span>
+    <button id="signout" onclick="doSignout()">Sign out</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-users">—</div>
+      <div class="stat-label">Total users</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-messages">—</div>
+      <div class="stat-label">Messages sent</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-rooms">—</div>
+      <div class="stat-label">Rooms</div>
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div class="section">
+    <h2>
+      Users
+      <span id="user-count"></span>
+      <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+    </h2>
+    <div id="users-table"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- Messages -->
+  <div class="section">
+    <h2>
+      Recent messages
+      <span id="msg-count"></span>
+      <button class="refresh-btn" onclick="loadMessages()">↻ Refresh</button>
+    </h2>
+    <div id="messages-table"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://chatapp-production-501c.up.railway.app';
+
+document.getElementById('lu').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lp').focus(); });
+document.getElementById('lp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const u = document.getElementById('lu').value.trim();
+  const p = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
+  const btn = document.getElementById('lbtn');
+  if(!u||!p) { err.textContent='Fill in both fields'; return; }
+  btn.disabled=true; err.textContent='Signing in...';
+  try {
+    const r = await fetch(BACKEND+'/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      credentials:'include', body:JSON.stringify({username:u,password:p})
+    });
+    const d = await r.json();
+    if(!r.ok) { err.textContent=d.error; return; }
+    // Check admin
+    const ar = await fetch(BACKEND+'/api/admin/stats', {credentials:'include'});
+    if(ar.status===403) { err.textContent='This account is not an admin'; return; }
+    document.getElementById('admin-name').textContent = u;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.add('on');
+    loadAll();
+  } catch(e) { err.textContent='Cannot reach server'; }
+  finally { btn.disabled=false; }
+}
+
+async function doSignout() {
+  await fetch(BACKEND+'/api/auth/logout', {method:'POST',credentials:'include'}).catch(()=>{});
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('app').classList.remove('on');
+}
+
+async function loadAll() {
+  loadStats(); loadUsers(); loadMessages();
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch(BACKEND+'/api/admin/stats', {credentials:'include'});
+    const d = await r.json();
+    document.getElementById('stat-users').textContent = d.users;
+    document.getElementById('stat-messages').textContent = d.messages;
+    document.getElementById('stat-rooms').textContent = d.rooms;
+  } catch(e) {}
+}
+
+async function loadUsers() {
+  document.getElementById('users-table').innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const r = await fetch(BACKEND+'/api/admin/users', {credentials:'include'});
+    const users = await r.json();
+    document.getElementById('user-count').textContent = users.length + ' total';
+    if(!users.length) { document.getElementById('users-table').innerHTML='<div class="empty">No users yet</div>'; return; }
+    document.getElementById('users-table').innerHTML = `
+      <table>
+        <tr><th>Username</th><th>Role</th><th>Joined</th><th>Action</th></tr>
+        ${users.map(u => `
+          <tr>
+            <td style="color:#fff;font-weight:500">${esc(u.username)}</td>
+            <td>${u.is_admin ? '<span class="admin-badge">Admin</span>' : '<span style="color:var(--tx3)">User</span>'}</td>
+            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+            <td>${u.is_admin ? '—' : `<button class="del-btn" onclick="deleteUser('${u.id}','${esc(u.username)}')">Delete</button>`}</td>
+          </tr>`).join('')}
+      </table>`;
+  } catch(e) { document.getElementById('users-table').innerHTML='<div class="empty">Failed to load</div>'; }
+}
+
+async function loadMessages() {
+  document.getElementById('messages-table').innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const r = await fetch(BACKEND+'/api/admin/messages', {credentials:'include'});
+    const msgs = await r.json();
+    document.getElementById('msg-count').textContent = msgs.length + ' recent';
+    if(!msgs.length) { document.getElementById('messages-table').innerHTML='<div class="empty">No messages yet</div>'; return; }
+    document.getElementById('messages-table').innerHTML = `
+      <table>
+        <tr><th>User</th><th>Room</th><th>Message</th><th>Time</th><th>Action</th></tr>
+        ${msgs.map(m => `
+          <tr>
+            <td style="color:#fff;font-weight:500">${esc(m.sender_name)}</td>
+            <td><span class="room-chip">${esc(m.room_id)}</span></td>
+            <td class="msg-content" title="${esc(m.content)}">${esc(m.content)}</td>
+            <td style="white-space:nowrap">${new Date(m.created_at).toLocaleString()}</td>
+            <td><button class="del-btn" onclick="deleteMsg('${m.id}')">Delete</button></td>
+          </tr>`).join('')}
+      </table>`;
+  } catch(e) { document.getElementById('messages-table').innerHTML='<div class="empty">Failed to load</div>'; }
+}
+
+async function deleteUser(id, name) {
+  if(!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  try {
+    const r = await fetch(BACKEND+'/api/admin/users/'+id, {method:'DELETE',credentials:'include'});
+    if(r.ok) { loadUsers(); loadStats(); }
+    else { const d=await r.json(); alert(d.error); }
+  } catch(e) { alert('Failed to delete'); }
+}
+
+async function deleteMsg(id) {
+  if(!confirm('Delete this message?')) return;
+  try {
+    const r = await fetch(BACKEND+'/api/admin/messages/'+id, {method:'DELETE',credentials:'include'});
+    if(r.ok) { loadMessages(); loadStats(); }
+    else { const d=await r.json(); alert(d.error); }
+  } catch(e) { alert('Failed to delete'); }
+}
+
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// Check existing session
+fetch(BACKEND+'/api/auth/me', {credentials:'include'})
+  .then(r => r.ok ? r.json() : null)
+  .then(async u => {
+    if(!u) return;
+    const ar = await fetch(BACKEND+'/api/admin/stats', {credentials:'include'});
+    if(ar.ok) {
+      document.getElementById('admin-name').textContent = u.username;
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('app').classList.add('on');
+      loadAll();
+    }
+  }).catch(()=>{});
+</script>
 </body>
 </html>
