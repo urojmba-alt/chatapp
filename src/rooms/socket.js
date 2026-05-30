@@ -191,7 +191,7 @@ export function registerSocketHandlers(io) {
         created_at: saved.created_at,
       });
 
-      if (/@ai\b/i.test(content)) triggerAI(io, socket, roomId, user);
+      if (/@ai\b/i.test(content)) { console.log("AI triggered by:", user.name, "in:", roomId); triggerAI(io, socket, roomId, user); }
     });
 
     /* typing */
