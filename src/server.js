@@ -78,7 +78,7 @@ app.use((err, _req, res, _next) => {
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-  cors: { origin: true, credentials: true },
+  cors: { origin: true, credentials: true }, allowEIO3: true,
   connectionStateRecovery: { maxDisconnectionDuration: 2 * 60 * 1000 },
 });
 
