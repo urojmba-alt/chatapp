@@ -69,3 +69,17 @@ async function run() {
 }
 
 run();
+
+async function makeAdmin() {
+  const pool2 = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  try {
+    await pool2.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE");
+    await pool2.query("UPDATE users SET is_admin = TRUE WHERE username = 'uroy'");
+    console.log("✓ uroy is now admin");
+  } catch(err) {
+    console.error("Admin setup error:", err.message);
+  } finally {
+    await pool2.end();
+  }
+}
+makeAdmin();
