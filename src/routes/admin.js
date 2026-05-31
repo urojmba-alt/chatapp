@@ -7,7 +7,7 @@ async function requireAdmin(req, res, next) {
   let userId = req.session?.userId;
   
   if (!userId) {
-    const token = req.headers["x-auth-token"];
+    const token = req.headers["x-auth-token"] || req.query.token;
     if (token) {
       try {
         const { rows } = await db.query(
