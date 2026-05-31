@@ -76,4 +76,20 @@ router.delete("/messages/:id", requireAdmin, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+
+router.get("/online", requireAdmin, async (req, res) => {
+  try {
+    const { getMembers } = await import("../lib/redis.js");
+    const { rows: rooms } = await db.query("SELECT id, name, icon FROM rooms");
+    const result = [];
+    for (const room of rooms) {
+      const members = await getMembers(room.id);
+      if (members.length > 0) {
+        result.push({ room_id: room.id, room_name: room.name, room_icon: room.icon, members });
+      }
+    }
+    res.json(result);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 export default router;
