@@ -12,6 +12,8 @@ import { fileURLToPath } from "url";
 import redis from "./lib/redis.js";
 import authRouter from "./routes/auth.js";
 import roomsRouter from "./routes/rooms.js";
+import adminRouter from "./routes/admin.js";
+import postsRouter from "./routes/posts.js";
 import { requireAuthSocket } from "./middleware/auth.js";
 import { registerSocketHandlers } from "./rooms/socket.js";
 
@@ -67,10 +69,7 @@ app.use("/api/auth",
 );
 app.use("/api/rooms", roomsRouter);
 
-import adminRouter from "./routes/admin.js";
 app.use("/api/admin", adminRouter);
-
-import postsRouter from "./routes/posts.js";
 app.use("/api/posts", postsRouter);
 
 app.use(express.static(join(__dirname, "../public")));
