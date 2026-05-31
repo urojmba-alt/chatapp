@@ -4,7 +4,7 @@ import db from "../lib/db.js";
 const router = Router();
 
 async function getUser(req) {
-  const token = req.headers["x-auth-token"];
+  const token = req.headers["x-auth-token"] || req.query.token;
   if (token) {
     const { rows } = await db.query(
       "SELECT u.id, u.username FROM users u JOIN sessions_tokens s ON s.user_id=u.id WHERE s.token=$1 AND s.expires_at>NOW()",
