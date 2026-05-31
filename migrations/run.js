@@ -149,3 +149,11 @@ async function addRooms3() {
   } catch(e) { console.error('addRooms3 error:', e.message); }
 }
 addRooms3();
+
+async function addMovies() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('movies','Film & TV','🎬','#BE185D','You are a film critic. Keep replies short.') ON CONFLICT DO NOTHING");
+    console.log('Movies room added');
+  } catch(e) { console.error('addMovies error:', e.message); }
+}
+addMovies();
