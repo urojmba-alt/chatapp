@@ -157,3 +157,23 @@ async function addMovies() {
   } catch(e) { console.error('addMovies error:', e.message); }
 }
 addMovies();
+
+async function addPostsTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS posts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username TEXT NOT NULL,
+        room_id TEXT REFERENCES rooms(id) ON DELETE SET NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query("CREATE INDEX IF NOT EXISTS idx_posts_room ON posts(room_id, created_at DESC)");
+    await pool.query("CREATE INDEX IF NOT EXISTS idx_posts_user ON posts(user_id, created_at DESC)");
+    console.log('Posts table ready');
+  } catch(e) { console.error('addPostsTable error:', e.message); }
+}
+addPostsTable();
