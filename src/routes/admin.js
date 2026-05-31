@@ -1,3 +1,4 @@
+import { getMembers } from "../lib/redis.js";
 import { Router } from "express";
 import db from "../lib/db.js";
 
@@ -79,7 +80,6 @@ router.delete("/messages/:id", requireAdmin, async (req, res) => {
 
 router.get("/online", requireAdmin, async (req, res) => {
   try {
-    const { getMembers } = await import("../lib/redis.js");
     const { rows: rooms } = await db.query("SELECT id, name, icon FROM rooms");
     const result = [];
     for (const room of rooms) {
