@@ -67,6 +67,12 @@ app.use("/api/auth",
 );
 app.use("/api/rooms", roomsRouter);
 
+import adminRouter from "./routes/admin.js";
+app.use("/api/admin", adminRouter);
+
+import postsRouter from "./routes/posts.js";
+app.use("/api/posts", postsRouter);
+
 app.use(express.static(join(__dirname, "../public")));
 app.get("*", (_, res) => res.sendFile(join(__dirname, "../public/index.html")));
 
@@ -92,3 +98,4 @@ httpServer.listen(PORT, () => {
 });
 
 process.on("unhandledRejection", err => console.error("UnhandledRejection:", err));
+
