@@ -138,3 +138,14 @@ async function addRooms2() {
   await pool.end();
 }
 addRooms2();
+
+async function addRooms3() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('fitness','Fitness & health','💪','#DC2626','You are a sports scientist. Keep replies short.') ON CONFLICT DO NOTHING");
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('travel','Travel & places','✈️','#0284C7','You are a travel writer. Keep replies short.') ON CONFLICT DO NOTHING");
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('science','Science & discovery','🔬','#6D28D9','You are a science communicator. Keep replies short.') ON CONFLICT DO NOTHING");
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('movies','Film & TV','🎬','#BE185D','You are a film critic. Keep replies short.') ON CONFLICT DO NOTHING");
+    console.log('Rooms 3 added');
+  } catch(e) { console.error('addRooms3 error:', e.message); }
+}
+addRooms3();
