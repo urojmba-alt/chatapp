@@ -177,3 +177,20 @@ async function addPostsTable() {
   } catch(e) { console.error('addPostsTable error:', e.message); }
 }
 addPostsTable();
+
+async function addTrendingRooms() {
+  try {
+    const rooms = [
+      ['worldcup2026','FIFA World Cup 2026','⚽','#15803D','You are a football expert and analyst. The 2026 FIFA World Cup is happening right now (June 11 - July 19, 2026) in the USA, Canada and Mexico. 48 teams, 104 matches. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['stockmarket','Stock market today','📈','#059669','You are a financial analyst. Discuss stocks, crypto, market trends and investing. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['technews','Tech launches','📱','#0369A1','You are a tech journalist. Discuss latest AI developments, gadget launches, startup news and tech trends. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['climate','Climate & environment','🌍','#047857','You are an environmental scientist. Discuss climate news, solutions, sustainability and environmental policy. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['summermovies','Summer movies 2026','🎬','#BE185D','You are a film critic. Discuss summer 2026 blockbusters, reviews, trailers and movie picks. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ];
+    for(const [id,name,icon,accent,sp] of rooms){
+      await pool.query('INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',[id,name,icon,accent,sp]);
+      console.log('Trending room added:',id);
+    }
+  } catch(e) { console.error('addTrendingRooms error:', e.message); }
+}
+addTrendingRooms();
