@@ -70,9 +70,14 @@ export function registerSocketHandlers(io) {
       socket.join(roomId); socket.currentRoom = roomId;
       await addMember(roomId, socket.id, {id:user.id,name:user.name,color:user.color});
       const { rows:history } = await db.query("SELECT id,role,sender_name,content,created_at FROM messages WHERE room_id=$1 ORDER BY created_at DESC LIMIT 50",[roomId]);
-      socket.emit("room:history", history.reverse());
+      const hist2 = history.reverse();
+      socket.emit("room:history", hist2);
       await pushMembers(io, roomId); await pushCounts(io);
       io.to(roomId).emit("message:new",{role:"system",sender_name:"system",content:`${user.name} joined`});
+      if (hist2.length === 0) {
+        console.log("[auto-ai] triggering welcome:", roomId);
+        setTimeout(() => triggerAI(io, socket, roomId, user, true), 2000);
+      };
     });
 
     socket.on("message:send", async (raw) => {
