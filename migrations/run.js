@@ -217,3 +217,12 @@ async function addSocialRooms() {
   } catch(e) { console.error('addSocialRooms:', e.message); }
 }
 addSocialRooms();
+
+async function addMissingRooms3() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING", ['makefriends','Make friends','\uD83E\uDD1D','#7C3AED','You are a friendly conversation starter. Keep replies 2-4 sentences.']);
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING", ['mentalhealth','Mental health','\uD83E\uDDE1','#EA580C','You are a warm empathetic support guide. Keep replies 2-4 sentences.']);
+    console.log('Added missing rooms');
+  } catch(e) { console.error('addMissingRooms3:', e.message); }
+}
+addMissingRooms3();
