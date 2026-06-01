@@ -55,6 +55,15 @@ async function run() {
     try {
       await pool.query(SQL);
       console.log("✓ Migrations complete");
+      await addMissingRooms();
+      await addSessions();
+      await addRooms2();
+      await addMovies();
+      await addTrendingRooms();
+      await addSocialRooms();
+      await addMissingRooms2();
+      await addMissingRooms3();
+      await fixTrailingWhitespace();
       await pool.end();
       process.exit(0);
     } catch (err) {
@@ -82,7 +91,6 @@ async function makeAdmin() {
     await pool2.end();
   }
 }
-makeAdmin();
 
 async function addSessions() {
   const pool2 = new (await import('pg')).default.Pool({ connectionString: process.env.DATABASE_URL });
@@ -99,7 +107,6 @@ async function addSessions() {
   } catch(e) { console.error("sessions:", e.message); }
   finally { await pool2.end(); }
 }
-addSessions();
 
 async function addMissingRooms() {
   const {default: pg} = await import('pg');
@@ -119,7 +126,6 @@ async function addMissingRooms() {
   }
   await pool2.end();
 }
-addMissingRooms();
 
 async function addRooms2() {
   const {default: pg} = await import('pg');
@@ -137,7 +143,6 @@ async function addRooms2() {
   }
   await pool.end();
 }
-addRooms2();
 
 async function addRooms3() {
   try {
@@ -156,7 +161,6 @@ async function addMovies() {
     console.log('Movies room added');
   } catch(e) { console.error('addMovies error:', e.message); }
 }
-addMovies();
 
 async function addPostsTable() {
   try {
@@ -193,7 +197,6 @@ async function addTrendingRooms() {
     }
   } catch(e) { console.error('addTrendingRooms error:', e.message); }
 }
-addTrendingRooms();
 
 async function fixTrailingWhitespace() {
   try {
@@ -201,7 +204,6 @@ async function fixTrailingWhitespace() {
     console.log('Fixed whitespace in', rowCount, 'messages');
   } catch(e) { console.error('fixWhitespace:', e.message); }
 }
-fixTrailingWhitespace();
 
 async function addSocialRooms() {
   try {
@@ -216,7 +218,6 @@ async function addSocialRooms() {
     }
   } catch(e) { console.error('addSocialRooms:', e.message); }
 }
-addSocialRooms();
 
 async function addMissingRooms3() {
   try {
@@ -225,4 +226,3 @@ async function addMissingRooms3() {
     console.log('Added missing rooms');
   } catch(e) { console.error('addMissingRooms3:', e.message); }
 }
-addMissingRooms3();
