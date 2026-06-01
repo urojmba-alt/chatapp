@@ -25,7 +25,7 @@ async function leave(socket, io, user) {
   await pushMembers(io, rid);
   await pushCounts(io);
 }
-async function triggerAI(io, socket, roomId, user) {
+async function triggerAI(io, socket, roomId, user, welcome=false) {
   const ok = await acquireAiSlot(roomId, AI_WINDOW_MS);
   if (!ok) { socket.emit("ai:rate_limited", { ms: AI_WINDOW_MS }); return; }
   const { rows:[room] } = await db.query("SELECT id,icon,accent,system_prompt FROM rooms WHERE id=$1",[roomId]);
