@@ -76,14 +76,9 @@ export function registerSocketHandlers(io) {
       socket.emit("room:history", hist2);
       await pushMembers(io, roomId); await pushCounts(io);
       io.to(roomId).emit("message:new",{role:"system",sender_name:"system",content:`${user.name} joined`});
-      // Trigger AI welcome if no messages in last 30 minutes
-      const recentMsg = hist2.length > 0 ? hist2[hist2.length - 1] : null;
-      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
-      const isStale = !recentMsg || new Date(recentMsg.created_at) < thirtyMinsAgo;
-      if (isStale) {
-        console.log("[auto-ai] no recent messages, triggering welcome:", roomId);
-        triggerAI(io, socket, roomId, user, true);
-      }
+      // Always trigger AI welcome when user joins
+      console.log("[auto-ai] welcoming:", user.name, "to", roomId);
+      triggerAI(io, socket, roomId, user, true);
     });
 
     socket.on("message:send", async (raw) => {
