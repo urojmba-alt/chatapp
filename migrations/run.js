@@ -226,3 +226,12 @@ async function addMissingRooms3() {
     console.log('Added missing rooms');
   } catch(e) { console.error('addMissingRooms3:', e.message); }
 }
+
+async function swapRoom() {
+  try {
+    await pool.query("DELETE FROM rooms WHERE id='mentalhealth'");
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('romance','Romance & love','\u2764\uFE0F','#E11D48','You are a warm romantic advice expert. Discuss love, dating, relationships and romance. Keep replies 2-4 sentences. You were summoned with @ai.') ON CONFLICT DO NOTHING");
+    console.log('Swapped mentalhealth to romance');
+  } catch(e) { console.error('swapRoom:', e.message); }
+}
+swapRoom();
