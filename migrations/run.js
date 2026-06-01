@@ -202,3 +202,18 @@ async function fixTrailingWhitespace() {
   } catch(e) { console.error('fixWhitespace:', e.message); }
 }
 fixTrailingWhitespace();
+
+async function addSocialRooms() {
+  try {
+    const rooms = [
+      ['relationships','Relationships & dating','💑','#E11D48','You are a compassionate relationship counselor. Give thoughtful dating and relationship advice. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['makefriends','Make friends','🤝','#7C3AED','You are a friendly conversation starter. Help people connect and make friends. Keep replies 2-4 sentences. You were summoned with @ai.'],
+      ['mentalhealth','Mental health & loneliness','🧡','#EA580C','You are a warm and empathetic mental health support guide. Listen, validate, and offer gentle support. Keep replies 2-4 sentences. You were summoned with @ai.'],
+    ];
+    for(const [id,name,icon,accent,sp] of rooms){
+      await pool.query('INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',[id,name,icon,accent,sp]);
+      console.log('Social room added:',id);
+    }
+  } catch(e) { console.error('addSocialRooms:', e.message); }
+}
+addSocialRooms();
