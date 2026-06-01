@@ -235,3 +235,11 @@ async function swapRoom() {
   } catch(e) { console.error('swapRoom:', e.message); }
 }
 swapRoom();
+
+async function addHeartbroken() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('heartbroken','Heartbroken','\uD83D\uDC94','#9F1239','You are a compassionate support guide for people going through heartbreak. Listen with empathy, offer gentle advice on healing and moving forward. Keep replies 2-4 sentences. You were summoned with @ai.') ON CONFLICT DO NOTHING");
+    console.log('Added heartbroken room');
+  } catch(e) { console.error('addHeartbroken:', e.message); }
+}
+addHeartbroken();
