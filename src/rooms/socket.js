@@ -82,7 +82,7 @@ export function registerSocketHandlers(io) {
       const isStale = !recentMsg || new Date(recentMsg.created_at) < thirtyMinsAgo;
       if (isStale) {
         console.log("[auto-ai] no recent messages, triggering welcome:", roomId);
-        setTimeout(() => triggerAI(io, socket, roomId, user, true), 2000);
+        triggerAI(io, socket, roomId, user, true);
       }
     });
 
