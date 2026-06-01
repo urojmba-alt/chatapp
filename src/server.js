@@ -91,6 +91,18 @@ io.engine.use(sessionMiddleware);
 io.use(requireAuthSocket);
 registerSocketHandlers(io);
 
+// Clear stale presence data on startup
+async function clearStalePresence() {
+  try {
+    const keys = await redis.keys('room:*:members');
+    if (keys.length) {
+      await redis.del(...keys);
+      console.log('Cleared stale presence for', keys.length, 'rooms');
+    }
+  } catch(e) { console.error('clearStalePresence:', e.message); }
+}
+clearStalePresence();
+
 const PORT = parseInt(process.env.PORT) || 3000;
 httpServer.listen(PORT, () => {
   console.log(`✓ Ready → http://localhost:${PORT} [${process.env.NODE_ENV ?? "development"}]`);
