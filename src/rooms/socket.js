@@ -39,7 +39,8 @@ async function triggerAI(io, socket, roomId, user, welcome=false) {
   }
   const { rows:[room] } = await db.query("SELECT id,icon,accent,system_prompt FROM rooms WHERE id=$1",[roomId]);
   if (!room) return;
-  const { rows:hist } = await db.query("SELECT role,sender_name,content FROM messages WHERE room_id=$1 ORDER BY created_at DESC LIMIT 20",[roomId]);
+  const { rows:histRaw } = await db.query("SELECT role,sender_name,content FROM messages WHERE room_id=$1 ORDER BY created_at DESC LIMIT 20",[roomId]);
+  const hist = histRaw.map(m => ({...m, content: m.content.trim()}));
   const raw = hist.reverse().map(m=>({ role:m.role==="ai"?"assistant":"user", content:`[${m.sender_name}]: ${m.content}` }));
   const messages = raw.reduce((acc,m)=>{ if(acc.length&&acc.at(-1).role===m.role){acc.at(-1).content+="\n"+m.content;}else{acc.push({...m});}return acc; },[]);
   if(!messages.length||messages[0].role!=="user") messages.unshift({role:"user",content:`[${user.name}]: (called @ai)`});
