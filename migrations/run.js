@@ -194,3 +194,11 @@ async function addTrendingRooms() {
   } catch(e) { console.error('addTrendingRooms error:', e.message); }
 }
 addTrendingRooms();
+
+async function fixTrailingWhitespace() {
+  try {
+    const {rowCount} = await pool.query("UPDATE messages SET content = TRIM(content) WHERE content != TRIM(content)");
+    console.log('Fixed whitespace in', rowCount, 'messages');
+  } catch(e) { console.error('fixWhitespace:', e.message); }
+}
+fixTrailingWhitespace();
