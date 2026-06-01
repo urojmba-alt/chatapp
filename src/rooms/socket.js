@@ -25,7 +25,14 @@ async function leave(socket, io, user) {
   await pushMembers(io, rid);
   await pushCounts(io);
 }
+const welcomeLocks = new Set();
+
 async function triggerAI(io, socket, roomId, user, welcome=false) {
+  if (welcome) {
+    if (welcomeLocks.has(roomId)) return;
+    welcomeLocks.add(roomId);
+    setTimeout(() => welcomeLocks.delete(roomId), 30000);
+  }
   if (!welcome) {
     const ok = await acquireAiSlot(roomId, AI_WINDOW_MS);
     if (!ok) { socket.emit("ai:rate_limited", { ms: AI_WINDOW_MS }); return; }
