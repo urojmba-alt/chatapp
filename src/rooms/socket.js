@@ -86,7 +86,11 @@ export function registerSocketHandlers(io) {
       socket.emit("room:history", hist2);
       await pushMembers(io, roomId); await pushCounts(io);
       io.to(roomId).emit("message:new",{role:"system",sender_name:"system",content:`${user.name} joined`});
-      // Welcome disabled temporarily
+      // Welcome user once per session
+      if (!welcomedUsers.has(user.id)) {
+        welcomedUsers.add(user.id);
+        triggerAI(io, socket, roomId, user, true);
+      }
     });
 
     socket.on("message:send", async (raw) => {
