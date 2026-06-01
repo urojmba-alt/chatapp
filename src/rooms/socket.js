@@ -57,6 +57,8 @@ async function triggerAI(io, socket, roomId, user, welcome=false) {
   } catch(err) { console.error("Claude error:",err.message); io.to(roomId).emit("ai:error","The AI could not respond."); }
 }
 
+const welcomedUsers = new Set();
+
 export function registerSocketHandlers(io) {
   io.on("connection", async (socket) => {
     let user;
@@ -84,9 +86,12 @@ export function registerSocketHandlers(io) {
       socket.emit("room:history", hist2);
       await pushMembers(io, roomId); await pushCounts(io);
       io.to(roomId).emit("message:new",{role:"system",sender_name:"system",content:`${user.name} joined`});
-      // Always trigger AI welcome when user joins
-      console.log("[auto-ai] welcoming:", user.name, "to", roomId);
-      triggerAI(io, socket, roomId, user, true);
+      // Welcome user once per session
+      if (!welcomedUsers.has(user.id)) {
+        welcomedUsers.add(user.id);
+        console.log("[auto-ai] first welcome for:", user.name);
+        triggerAI(io, socket, roomId, user, true);
+      }
     });
 
     socket.on("message:send", async (raw) => {
