@@ -74,7 +74,7 @@ export function registerSocketHandlers(io) {
       socket.emit("room:history", hist2);
       await pushMembers(io, roomId); await pushCounts(io);
       io.to(roomId).emit("message:new",{role:"system",sender_name:"system",content:`${user.name} joined`});
-      if (hist2.length === 0) {
+      if (hist2.length < 3) {
         console.log("[auto-ai] triggering welcome:", roomId);
         setTimeout(() => triggerAI(io, socket, roomId, user, true), 2000);
       };
