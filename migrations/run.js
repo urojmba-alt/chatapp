@@ -61,7 +61,6 @@ async function run() {
       await addMovies();
       await addTrendingRooms();
       await addSocialRooms();
-      await addMissingRooms2();
       await addMissingRooms3();
       await fixTrailingWhitespace();
       await pool.end();
