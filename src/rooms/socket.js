@@ -94,7 +94,7 @@ export function registerSocketHandlers(io) {
       if (!content) return;
       const { rows:[saved] } = await db.query("INSERT INTO messages (room_id,user_id,role,sender_name,content) VALUES ($1,$2,'user',$3,$4) RETURNING id,created_at",[roomId,user.id,user.name,content]);
       io.to(roomId).emit("message:new",{id:saved.id,role:"user",sender_name:user.name,color:user.color,content,created_at:saved.created_at});
-      if(/@ai\b/i.test(content)) triggerAI(io,socket,roomId,user);
+      if(/@ai\b/i.test(content)){triggerAI(io,socket,roomId,user);}else{getMemberCount(roomId).then(c=>{if(c<=1&&Math.random()<0.6)setTimeout(()=>triggerAI(io,socket,roomId,user),1500);});}
     });
 
     socket.on("typing:start",()=>{ if(socket.currentRoom) socket.to(socket.currentRoom).emit("user:typing",{name:user.name}); });
