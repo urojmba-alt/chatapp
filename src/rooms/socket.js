@@ -72,6 +72,8 @@ export function registerSocketHandlers(io) {
     }
     console.log(`[+] ${user.name}`);
     await pushCounts(io);
+    // Send current counts to this socket immediately
+    socket.emit("rooms:counts", {});
 
     socket.on("room:join", async (roomId) => {
       if (socket.currentRoom) await leave(socket, io, user);
