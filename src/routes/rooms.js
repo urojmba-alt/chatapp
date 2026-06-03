@@ -52,41 +52,35 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
     worldcup2026: 'https://feeds.bbci.co.uk/sport/football/rss.xml',
-    stockmarket: 'https://feeds.reuters.com/reuters/businessNews',
-    technews: 'https://feeds.feedburner.com/TechCrunch',
+    space: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
+    technews: 'https://techcrunch.com/feed/',
+    stockmarket: 'https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines',
     climate: 'https://www.theguardian.com/environment/climate-crisis/rss',
     summermovies: 'https://variety.com/feed/',
     romance: 'https://people.com/tag/celebrity-couples/feed/',
-    relationships: 'https://people.com/tag/love/feed/',
-    heartbroken: 'https://people.com/tag/breakups/feed/',
-    space: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
     tech: 'https://www.theverge.com/rss/index.xml',
-    cooking: 'https://www.bonappetit.com/feed/rss',
-    finance: 'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
-    fitness: 'https://www.menshealth.com/rss/all.xml/',
-    travel: 'https://www.lonelyplanet.com/news/feed',
     science: 'https://www.sciencedaily.com/rss/top/science.xml',
-    movies: 'https://www.hollywoodreporter.com/feed/',
     music: 'https://pitchfork.com/rss/news/',
-    history: 'https://www.smithsonianmag.com/rss/history-archaeology/',
-    nature: 'https://feeds.nationalgeographic.com/ng/News/News_Main',
-    psychology: 'https://rss.psychologytoday.com/rss/headlines',
-    makefriends: 'https://people.com/tag/friendship/feed/',
+    movies: 'https://www.hollywoodreporter.com/feed/',
+    fitness: 'https://www.runnersworld.com/feed/all/',
   };
   const feed = feeds[req.params.roomId];
   if (!feed) return res.json([]);
   try {
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}&count=4`;
-    const response = await fetch(apiUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    const text = await response.text();
-    console.log('[news] response:', text.slice(0, 200));
-    const d = JSON.parse(text);
-    if (d.status !== 'ok') { console.log('[news] bad status:', d); return res.json([]); }
-    const items = d.items.slice(0,3).map(i => ({ title: i.title, link: i.link }));
+    const r = await fetch(feed, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/rss+xml,application/xml,text/xml' }, signal: AbortSignal.timeout(5000) });
+    const xml = await r.text();
+    // Simple XML parser for RSS items
+    const items = [];
+    const itemMatches = xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/g);
+    for (const m of itemMatches) {
+      const item = m[1];
+      const title = item.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1]?.trim();
+      const link = item.match(/<link[^>]*>(.*?)<\/link>/)?.[1]?.trim() || item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1]?.trim();
+      if (title && link && link.startsWith('http')) items.push({ title, link });
+      if (items.length >= 3) break;
+    }
     res.json(items);
-  } catch(e) { res.json([]); }
+  } catch(e) { console.log('[news error]', e.message); res.json([]); }
 });
 
 export default router;
