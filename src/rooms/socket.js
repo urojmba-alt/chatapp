@@ -72,6 +72,8 @@ export function registerSocketHandlers(io) {
     }
     console.log(`[+] ${user.name}`);
     await pushCounts(io);
+    // Track total connected users (not just in rooms)
+    io.emit("users:online", { count: (await io.fetchSockets()).length });
     // Send current counts to this socket immediately
     socket.emit("rooms:counts", {});
 
