@@ -48,3 +48,41 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 });
 
 export default router;
+
+// News proxy endpoint
+import https from 'https';
+router.get('/news/:roomId', async (req, res) => {
+  const feeds = {
+    worldcup2026: 'https://feeds.bbci.co.uk/sport/football/rss.xml',
+    stockmarket: 'https://feeds.reuters.com/reuters/businessNews',
+    technews: 'https://feeds.feedburner.com/TechCrunch',
+    climate: 'https://www.theguardian.com/environment/climate-crisis/rss',
+    summermovies: 'https://variety.com/feed/',
+    romance: 'https://people.com/tag/celebrity-couples/feed/',
+    relationships: 'https://people.com/tag/love/feed/',
+    heartbroken: 'https://people.com/tag/breakups/feed/',
+    space: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
+    tech: 'https://www.theverge.com/rss/index.xml',
+    cooking: 'https://www.bonappetit.com/feed/rss',
+    finance: 'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
+    fitness: 'https://www.menshealth.com/rss/all.xml/',
+    travel: 'https://www.lonelyplanet.com/news/feed',
+    science: 'https://www.sciencedaily.com/rss/top/science.xml',
+    movies: 'https://www.hollywoodreporter.com/feed/',
+    music: 'https://pitchfork.com/rss/news/',
+    history: 'https://www.smithsonianmag.com/rss/history-archaeology/',
+    nature: 'https://feeds.nationalgeographic.com/ng/News/News_Main',
+    psychology: 'https://rss.psychologytoday.com/rss/headlines',
+    makefriends: 'https://people.com/tag/friendship/feed/',
+  };
+  const feed = feeds[req.params.roomId];
+  if (!feed) return res.json([]);
+  try {
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}&count=4`;
+    const r = await fetch(apiUrl);
+    const d = await r.json();
+    if (d.status !== 'ok') return res.json([]);
+    const items = d.items.slice(0,3).map(i => ({ title: i.title, link: i.link }));
+    res.json(items);
+  } catch(e) { res.json([]); }
+});
