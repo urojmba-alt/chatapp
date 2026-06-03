@@ -47,7 +47,6 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
   }
 });
 
-export default router;
 
 // News proxy endpoint
 router.get('/news/:roomId', async (req, res) => {
@@ -89,3 +88,5 @@ router.get('/news/:roomId', async (req, res) => {
     res.json(items);
   } catch(e) { res.json([]); }
 });
+
+export default router;
