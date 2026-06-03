@@ -92,4 +92,13 @@ router.get("/online", requireAdmin, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+
+router.get("/connected", requireAdmin, async (req, res) => {
+  try {
+    const io = req.app.get("io");
+    const sockets = await io.fetchSockets();
+    res.json({ count: sockets.length });
+  } catch(e) { res.status(500).json({ count: 0 }); }
+});
+
 export default router;

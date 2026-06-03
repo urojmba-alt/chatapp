@@ -90,6 +90,7 @@ const io = new Server(httpServer, {
 io.engine.use(sessionMiddleware);
 io.use(requireAuthSocket);
 registerSocketHandlers(io);
+app.set("io", io);
 
 // Clear stale presence data on startup
 async function clearStalePresence() {
