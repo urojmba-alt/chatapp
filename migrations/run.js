@@ -257,3 +257,11 @@ async function addFriendsTable() {
   } catch(e) { console.error('addFriendsTable:', e.message); }
 }
 addFriendsTable();
+
+async function clearMessages() {
+  try {
+    await pool.query("DELETE FROM messages");
+    console.log('All messages cleared');
+  } catch(e) { console.error('clearMessages:', e.message); }
+}
+clearMessages();
