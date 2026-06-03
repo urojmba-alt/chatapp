@@ -63,6 +63,16 @@ router.get('/news/:roomId', async (req, res) => {
     music: 'https://pitchfork.com/rss/news/',
     movies: 'https://www.hollywoodreporter.com/feed/',
     fitness: 'https://www.runnersworld.com/feed/all/',
+    relationships: 'https://people.com/tag/love/feed/',
+    makefriends: 'https://people.com/tag/friendship/feed/',
+    heartbroken: 'https://people.com/tag/breakups/feed/',
+    history: 'https://www.smithsonianmag.com/rss/history-archaeology/',
+    cooking: 'https://www.bonappetit.com/feed/rss',
+    philosophy: 'https://philosophynow.org/rss',
+    nature: 'https://feeds.nationalgeographic.com/ng/News/News_Main',
+    psychology: 'https://rss.psychologytoday.com/rss/headlines',
+    finance: 'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
+    travel: 'https://www.lonelyplanet.com/news/feed',
   };
   const feed = feeds[req.params.roomId];
   if (!feed) return res.json([]);
