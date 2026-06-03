@@ -50,7 +50,6 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 export default router;
 
 // News proxy endpoint
-import https from 'https';
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
     worldcup2026: 'https://feeds.bbci.co.uk/sport/football/rss.xml',
@@ -79,9 +78,13 @@ router.get('/news/:roomId', async (req, res) => {
   if (!feed) return res.json([]);
   try {
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}&count=4`;
-    const r = await fetch(apiUrl);
-    const d = await r.json();
-    if (d.status !== 'ok') return res.json([]);
+    const response = await fetch(apiUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    const text = await response.text();
+    console.log('[news] response:', text.slice(0, 200));
+    const d = JSON.parse(text);
+    if (d.status !== 'ok') { console.log('[news] bad status:', d); return res.json([]); }
     const items = d.items.slice(0,3).map(i => ({ title: i.title, link: i.link }));
     res.json(items);
   } catch(e) { res.json([]); }
