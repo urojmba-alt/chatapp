@@ -265,3 +265,11 @@ async function clearMessages() {
   } catch(e) { console.error('clearMessages:', e.message); }
 }
 clearMessages();
+
+async function addCareersRoom() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('careers','Careers & jobs','\uD83D\uDCBC','#0369A1','You are a career coach and recruitment expert. Give advice on job hunting, interviews, career growth, salary negotiation and workplace challenges. Keep replies 2-4 sentences. You were summoned with @ai.') ON CONFLICT DO NOTHING");
+    console.log('Careers room added');
+  } catch(e) { console.error('addCareersRoom:', e.message); }
+}
+addCareersRoom();
