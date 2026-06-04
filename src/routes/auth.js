@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import db from "../lib/db.js";
 import crypto from "crypto";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 const PALETTE = [
@@ -86,13 +87,13 @@ router.get("/me", async (req, res) => {
   res.json({ id: req.session.userId, username: req.session.username, color: req.session.color });
 });
 
-export { getUserByToken };
-export default router;
-
 // Delete account
 router.delete('/account', requireAuth, async (req, res) => {
   try {
-    await db.query('DELETE FROM users WHERE id=$1', [req.user.id]);
+    await db.query('DELETE FROM users WHERE id=$1', [req.session.userId]);
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
+
+export { getUserByToken };
+export default router;
