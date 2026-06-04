@@ -273,3 +273,22 @@ async function addCareersRoom() {
   } catch(e) { console.error('addCareersRoom:', e.message); }
 }
 addCareersRoom();
+
+async function addDMTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS direct_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        receiver_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_dm_receiver ON direct_messages(receiver_id, created_at DESC)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_dm_convo ON direct_messages(sender_id, receiver_id, created_at DESC)');
+    console.log('DM table ready');
+  } catch(e) { console.error('addDMTable:', e.message); }
+}
+addDMTable();
