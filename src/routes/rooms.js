@@ -63,6 +63,7 @@ router.get('/news/:roomId', async (req, res) => {
     music: 'https://pitchfork.com/rss/news/',
     movies: 'https://www.hollywoodreporter.com/feed/',
     fitness: 'https://www.menshealth.com/rss/all.xml',
+    careers: 'https://www.theguardian.com/careers/rss',
     relationships: 'https://hollywoodlife.com/feed/',
     makefriends: 'https://pagesix.com/feed/',
     heartbroken: 'https://hollywoodlife.com/feed/',
