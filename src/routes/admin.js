@@ -122,7 +122,7 @@ router.post("/2fa/request", async (req, res) => {
     const expires = Date.now() + 5 * 60 * 1000;
     twoFACodes.set(user.id, { code, expires });
     console.log(`[2FA] Admin ${user.username} code: ${code}`);
-    res.json({ ok: true, message: "Code generated - check Railway logs" });
+    res.json({ ok: true, message: "Code ready" });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
