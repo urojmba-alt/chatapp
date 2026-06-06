@@ -25,5 +25,47 @@ async function lm(){const el=document.getElementById('mt');el.innerHTML='<div cl
 async function du(id,n){if(!confirm('Delete "'+n+'"?'))return;const r=await af(B+'/api/admin/users/'+id,{method:'DELETE'});if(r.ok){lu2();ls();}}
 async function dm(id){console.log('deleting id:',id);if(!confirm('Delete?'))return;const r=await af(B+'/api/admin/messages/'+id,{method:'DELETE'});const d=await r.json();console.log('delete result:',r.status,d);if(r.ok){setTimeout(()=>{lm();ls();},500);}else{alert('Error: '+JSON.stringify(d));}}
 setInterval(ls,30000);setInterval(lo,15000);
-const t=tok();if(t){af(B+'/api/auth/me').then(r=>r.ok?r.json():null).then(async u=>{if(!u)return;const ar=await af(B+'/api/admin/stats');if(ar.ok)show(u.username);}).catch(()=>{});}
+const t=tok();if(t){af(B+'/api/auth/me').then(r=>r.ok?r.json():null).then(async u=>{
+  if(!u)return;
+  // Check if 2FA verified this session
+  if(!sessionStorage.getItem('2fa_verified')){
+    show2FA(u.username);
+  } else {
+    const ar=await af(B+'/api/admin/stats');if(ar.ok)show(u.username);
+  }
+}).catch(()=>{});}
+
+function show2FA(username){
+  document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0F0E17">'
+    +'<div style="background:#1A1827;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:320px;text-align:center">'
+    +'<div style="font-size:32px;margin-bottom:12px">🔐</div>'
+    +'<h2 style="color:#fff;margin-bottom:8px">Two-factor auth</h2>'
+    +'<p style="color:#6B6D7C;font-size:13px;margin-bottom:20px">Hi '+username+', request a code then enter it below</p>'
+    +'<button onclick="request2FA()" style="width:100%;padding:10px;background:rgba(108,58,237,.2);color:#A78BFA;border:1px solid rgba(108,58,237,.3);border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:12px">Request code</button>'
+    +'<input id="twofa-input" type="text" maxlength="6" placeholder="Enter 6-digit code" style="width:100%;padding:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:16px;text-align:center;letter-spacing:4px;margin-bottom:12px;box-sizing:border-box">'
+    +'<button onclick="verify2FA()" style="width:100%;padding:10px;background:linear-gradient(135deg,#6C3AED,#9333EA);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">Verify</button>'
+    +'<div id="twofa-err" style="color:#F87171;font-size:12px;margin-top:8px"></div>'
+    +'</div></div>';
+}
+
+async function request2FA(){
+  const r=await af(B+'/api/admin/2fa/request',{method:'POST'});
+  const d=await r.json();
+  document.getElementById('twofa-err').style.color='#4ADE80';
+  document.getElementById('twofa-err').textContent=d.message||d.error;
+}
+
+async function verify2FA(){
+  const code=document.getElementById('twofa-input').value.trim();
+  if(code.length!==6){document.getElementById('twofa-err').textContent='Enter 6-digit code';return;}
+  const r=await af(B+'/api/admin/2fa/verify',{method:'POST',body:JSON.stringify({code})});
+  const d=await r.json();
+  if(d.verified){
+    sessionStorage.setItem('2fa_verified','1');
+    location.reload();
+  } else {
+    document.getElementById('twofa-err').style.color='#F87171';
+    document.getElementById('twofa-err').textContent=d.error||'Wrong code';
+  }
+}
 </script></body></html>
