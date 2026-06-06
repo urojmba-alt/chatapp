@@ -27,6 +27,18 @@ async function leave(socket, io, user) {
 }
 const welcomeLocks = new Set();
 
+
+const BLOCKED_WORDS = [
+  'fuck', 'sex', 'pussy', 'dick', 'cock', 'porn', 'nude', 'naked',
+  'boobs', 'ass', 'bitch', 'whore', 'slut', 'rape', 'horny',
+  'sexy', 'hot girl', 'bf', 'gf wanted', 'girlfriend wanted'
+];
+
+function containsBlockedWord(text) {
+  const lower = text.toLowerCase();
+  return BLOCKED_WORDS.some(w => lower.includes(w));
+}
+
 async function triggerAI(io, socket, roomId, user, welcome=false) {
   if (welcome) {
     if (welcomeLocks.has(roomId)) return;
@@ -96,6 +108,10 @@ export function registerSocketHandlers(io) {
       if (!roomId||typeof raw!=="string") return;
       const content = raw.trim().slice(0,2000);
       if (!content) return;
+      if (containsBlockedWord(content)) {
+        socket.emit("message:blocked", { reason: "Your message was blocked. Please keep conversations respectful." });
+        return;
+      }
       const { rows:[saved] } = await db.query("INSERT INTO messages (room_id,user_id,role,sender_name,content) VALUES ($1,$2,'user',$3,$4) RETURNING id,created_at",[roomId,user.id,user.name,content]);
       io.to(roomId).emit("message:new",{id:saved.id,role:"user",sender_name:user.name,color:user.color,content,created_at:saved.created_at});
       if(/@ai\b/i.test(content)){triggerAI(io,socket,roomId,user);}else{getMemberCount(roomId).then(c=>{if(c<=1&&Math.random()<0.6){console.log("[auto-ai] engaging for:",user.name,"in:",roomId);setTimeout(()=>triggerAI(io,socket,roomId,user),1500);};});}
