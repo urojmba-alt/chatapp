@@ -308,3 +308,11 @@ async function addLastSeen() {
   } catch(e) { console.error('addLastSeen:', e.message); }
 }
 addLastSeen();
+
+async function addLoginCount() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INTEGER DEFAULT 0");
+    console.log('login_count added');
+  } catch(e) { console.error('addLoginCount:', e.message); }
+}
+addLoginCount();

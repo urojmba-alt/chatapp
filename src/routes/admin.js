@@ -48,7 +48,7 @@ router.get("/stats", requireAdmin, async (req, res) => {
 router.get("/users", requireAdmin, async (req, res) => {
   try {
     const { rows } = await db.query(
-      "SELECT id, username, email, is_admin, created_at, last_seen, (SELECT COUNT(*) FROM messages WHERE user_id=users.id) as msg_count FROM users ORDER BY created_at DESC LIMIT 100"
+      "SELECT id, username, email, is_admin, created_at, last_seen, login_count, (SELECT COUNT(*) FROM messages WHERE user_id=users.id) as msg_count FROM users ORDER BY created_at DESC LIMIT 100"
     );
     res.json(rows);
   } catch(err) { res.status(500).json({ error: err.message }); }
