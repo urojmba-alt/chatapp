@@ -46,6 +46,7 @@ router.post("/register", async (req, res) => {
     );
     const u = rows[0];
     const token = await saveToken(u.id);
+      await db.query('UPDATE users SET last_seen=NOW() WHERE id=$1', [u.id]);
     req.session.userId = u.id; req.session.username = u.username;
     req.session.color = { bg: u.color_bg, fg: u.color_fg };
     res.json({ id: u.id, username: u.username, color: req.session.color, token });
@@ -67,6 +68,7 @@ router.post("/login", async (req, res) => {
     const u = rows[0];
     if (!await bcrypt.compare(password, u.password_hash)) return res.status(401).json({ error: "Invalid credentials" });
     const token = await saveToken(u.id);
+      await db.query('UPDATE users SET last_seen=NOW() WHERE id=$1', [u.id]);
     req.session.userId = u.id; req.session.username = u.username;
     req.session.color = { bg: u.color_bg, fg: u.color_fg };
     res.json({ id: u.id, username: u.username, color: req.session.color, token });

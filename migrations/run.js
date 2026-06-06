@@ -300,3 +300,11 @@ async function addEmailField() {
   } catch(e) { console.error('addEmailField:', e.message); }
 }
 addEmailField();
+
+async function addLastSeen() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ");
+    console.log('last_seen added');
+  } catch(e) { console.error('addLastSeen:', e.message); }
+}
+addLastSeen();
