@@ -64,7 +64,7 @@ router.get('/news/:roomId', async (req, res) => {
     movies: 'https://www.hollywoodreporter.com/feed/',
     fitness: 'https://www.menshealth.com/rss/all.xml',
     careers: 'https://www.theguardian.com/careers/rss',
-    horoscope: 'https://timesofindia.indiatimes.com/rssfeeds/horoscope-daily.cms',
+    horoscope: 'https://feeds.feedburner.com/astrologyzone',
     relationships: 'https://hollywoodlife.com/feed/',
     makefriends: 'https://pagesix.com/feed/',
     heartbroken: 'https://hollywoodlife.com/feed/',
@@ -83,7 +83,8 @@ router.get('/news/:roomId', async (req, res) => {
     const xml = await r.text();
     // Simple XML parser for RSS items
     const items = [];
-    const itemMatches = xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/g);
+    const tagName = xml.includes('<entry') ? 'entry' : 'item';
+    const itemMatches = xml.matchAll(new RegExp(`<${tagName}[^>]*>([\s\S]*?)<\/${tagName}>`, 'g'));
     for (const m of itemMatches) {
       const item = m[1];
       const title = item.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1]?.trim();
