@@ -316,3 +316,11 @@ async function addLoginCount() {
   } catch(e) { console.error('addLoginCount:', e.message); }
 }
 addLoginCount();
+
+async function addHoroscopeRoom() {
+  try {
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ('horoscope','Horoscope & astrology','⭐','#7C3AED','You are an expert astrologer. Give horoscope readings, zodiac compatibility, and astrology insights. Keep replies 2-4 sentences. You were summoned with @ai.') ON CONFLICT DO NOTHING");
+    console.log('Horoscope room added');
+  } catch(e) { console.error('addHoroscopeRoom:', e.message); }
+}
+addHoroscopeRoom();
