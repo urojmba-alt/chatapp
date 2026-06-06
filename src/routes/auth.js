@@ -40,7 +40,7 @@ router.post("/register", async (req, res) => {
     const hash = await bcrypt.hash(password, 12);
     const c = randColor();
     const { rows } = await db.query(
-      "INSERT INTO users (username, email, password_hash, color_bg, color_fg) VALUES ($1,$2,$3,$4) RETURNING id, username, color_bg, color_fg",
+      "INSERT INTO users (username, email, password_hash, color_bg, color_fg) VALUES ($1,$2,$3,$4,$5) RETURNING id, username, color_bg, color_fg",
       [username.trim(), email?.trim()||null, hash, c.bg, c.fg]
     );
     const u = rows[0];
