@@ -34,8 +34,7 @@ async function getUserByToken(token) {
 router.post("/register", async (req, res) => {
   const { username, password, email } = req.body ?? {};
   if (!username?.trim() || !password) return res.status(400).json({ error: "Username and password required" });
-  if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
-  if (!email.includes("@")) return res.status(400).json({ error: "Please enter a valid email" });
+
   if (username.trim().length < 2 || username.trim().length > 20) return res.status(400).json({ error: "Username must be 2-20 characters" });
   if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
   try {
@@ -59,8 +58,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { username, password, email } = req.body ?? {};
   if (!username?.trim() || !password) return res.status(400).json({ error: "Username and password required" });
-  if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
-  if (!email.includes("@")) return res.status(400).json({ error: "Please enter a valid email" });
+
   try {
     const { rows } = await db.query(
       "SELECT id, username, password_hash, color_bg, color_fg FROM users WHERE username=$1", [username.trim()]
