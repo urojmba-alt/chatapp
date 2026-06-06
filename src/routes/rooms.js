@@ -64,7 +64,7 @@ router.get('/news/:roomId', async (req, res) => {
     movies: 'https://www.hollywoodreporter.com/feed/',
     fitness: 'https://www.menshealth.com/rss/all.xml',
     careers: 'https://www.theguardian.com/careers/rss',
-    horoscope: 'https://www.astrology.com/rss/horoscope.rss',
+    horoscope: 'https://feeds.feedburner.com/astrologyzone',
     relationships: 'https://hollywoodlife.com/feed/',
     makefriends: 'https://pagesix.com/feed/',
     heartbroken: 'https://hollywoodlife.com/feed/',
