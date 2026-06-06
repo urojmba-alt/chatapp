@@ -108,27 +108,42 @@ function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-router.post("/2fa/request", requireAdmin, async (req, res) => {
+router.post("/2fa/request", async (req, res) => {
   try {
+    const token = req.headers['x-auth-token'] || req.query.token;
+    if (!token) return res.status(401).json({ error: 'Login required' });
+    const { rows } = await db.query(
+      "SELECT u.id, u.username, u.is_admin FROM users u JOIN sessions_tokens s ON s.user_id=u.id WHERE s.token=$1 AND s.expires_at>NOW()",
+      [token]
+    );
+    if (!rows.length || !rows[0].is_admin) return res.status(403).json({ error: 'Admin only' });
+    const user = rows[0];
     const code = generateCode();
-    const expires = Date.now() + 5 * 60 * 1000; // 5 minutes
-    twoFACodes.set(req.user.id, { code, expires });
-    console.log(`[2FA] Admin ${req.user.username} code: ${code}`);
+    const expires = Date.now() + 5 * 60 * 1000;
+    twoFACodes.set(user.id, { code, expires });
+    console.log(`[2FA] Admin ${user.username} code: ${code}`);
     res.json({ ok: true, message: "Code generated - check Railway logs" });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post("/2fa/verify", requireAdmin, async (req, res) => {
+router.post("/2fa/verify", async (req, res) => {
   try {
+    const token = req.headers['x-auth-token'] || req.query.token;
+    if (!token) return res.status(401).json({ error: 'Login required' });
+    const { rows } = await db.query(
+      "SELECT u.id, u.is_admin FROM users u JOIN sessions_tokens s ON s.user_id=u.id WHERE s.token=$1 AND s.expires_at>NOW()",
+      [token]
+    );
+    if (!rows.length || !rows[0].is_admin) return res.status(403).json({ error: 'Admin only' });
     const { code } = req.body;
-    const stored = twoFACodes.get(req.user.id);
+    const stored = twoFACodes.get(rows[0].id);
     if (!stored) return res.status(400).json({ error: "No code requested" });
     if (Date.now() > stored.expires) {
       twoFACodes.delete(req.user.id);
       return res.status(400).json({ error: "Code expired" });
     }
     if (stored.code !== code) return res.status(400).json({ error: "Wrong code" });
-    twoFACodes.delete(req.user.id);
+    twoFACodes.delete(rows[0].id);
     res.json({ ok: true, verified: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
