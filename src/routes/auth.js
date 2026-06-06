@@ -32,7 +32,7 @@ async function getUserByToken(token) {
 }
 
 router.post("/register", async (req, res) => {
-  const { username, password } = req.body ?? {};
+  const { username, password, email } = req.body ?? {};
   if (!username?.trim() || !password) return res.status(400).json({ error: "Username and password required" });
   if (username.trim().length < 2 || username.trim().length > 20) return res.status(400).json({ error: "Username must be 2-20 characters" });
   if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
@@ -40,8 +40,8 @@ router.post("/register", async (req, res) => {
     const hash = await bcrypt.hash(password, 12);
     const c = randColor();
     const { rows } = await db.query(
-      "INSERT INTO users (username, password_hash, color_bg, color_fg) VALUES ($1,$2,$3,$4) RETURNING id, username, color_bg, color_fg",
-      [username.trim(), hash, c.bg, c.fg]
+      "INSERT INTO users (username, email, password_hash, color_bg, color_fg) VALUES ($1,$2,$3,$4) RETURNING id, username, color_bg, color_fg",
+      [username.trim(), email?.trim()||null, hash, c.bg, c.fg]
     );
     const u = rows[0];
     const token = await saveToken(u.id);
@@ -55,7 +55,7 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body ?? {};
+  const { username, password, email } = req.body ?? {};
   if (!username?.trim() || !password) return res.status(400).json({ error: "Username and password required" });
   try {
     const { rows } = await db.query(
