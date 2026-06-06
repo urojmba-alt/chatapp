@@ -292,3 +292,11 @@ async function addDMTable() {
   } catch(e) { console.error('addDMTable:', e.message); }
 }
 addDMTable();
+
+async function addEmailField() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE");
+    console.log('Email field added');
+  } catch(e) { console.error('addEmailField:', e.message); }
+}
+addEmailField();
