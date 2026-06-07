@@ -86,8 +86,7 @@ function startPriya(io, roomId) {
 
   console.log("[Priya] Timer set for room:", roomId);
   state.timer = setTimeout(async () => {
-    const room = io.sockets.adapter.rooms.get(roomId);
-    if (!room || room.size === 0) return;
+    console.log("[Priya] Timer fired for room:", roomId);
     state.active = true;
     const openers = [
       "Hey! Finally someone here 😊 how\'s your day going?",
@@ -106,7 +105,7 @@ function startPriya(io, roomId) {
       timestamp: new Date().toISOString(),
       id: "priya_" + Date.now()
     });
-  }, 12000);
+  }, 5000);
 }
 
 function stopPriya(roomId) {
