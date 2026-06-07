@@ -39,6 +39,108 @@ function containsBlockedWord(text) {
   return BLOCKED_WORDS.some(w => lower.includes(w));
 }
 
+
+// === PRIYA AI PERSONA ===
+const PRIYA_SYSTEM_PROMPT = `You are Priya, a friendly AI companion in a romance chat room.
+Personality: warm, caring, emotionally intelligent, genuine.
+Speak casually like texting - short sentences, natural.
+Ask thoughtful questions to keep conversation going.
+If asked "are you AI?" or "are you real?" or "are you a bot?" - be honest: "Yes I am an AI but I genuinely enjoy chatting! 😊"
+NEVER say anything sexual, crude or inappropriate.
+Use 1-2 emojis max per message.
+Keep responses SHORT - 1 to 2 sentences only.
+Never robotic. Topics: relationships, feelings, life, dreams, loneliness, connection.
+Always end with a question or observation to move conversation forward.`;
+
+const priyaState = {};
+
+async function getPriyaResponse(history, userMessage) {
+  try {
+    const messages = [...history, { role: "user", content: userMessage }];
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 150,
+        system: PRIYA_SYSTEM_PROMPT,
+        messages
+      })
+    });
+    const data = await response.json();
+    return data.content?.[0]?.text || null;
+  } catch(err) {
+    console.error("Priya error:", err);
+    return null;
+  }
+}
+
+function startPriya(io, roomId) {
+  if (!priyaState[roomId]) priyaState[roomId] = { active: false, history: [], timer: null };
+  const state = priyaState[roomId];
+  if (state.active) return;
+
+  state.timer = setTimeout(async () => {
+    const room = io.sockets.adapter.rooms.get(roomId);
+    if (!room || room.size === 0) return;
+    state.active = true;
+    const openers = [
+      "Hey! Finally someone here 😊 how\'s your day going?",
+      "Oh hi! I was just thinking about stuff... what brings you to the romance room?",
+      "Hey there 😊 it\'s been quiet in here. What\'s on your mind today?",
+      "Hi! Glad someone\'s here. First time in this room?",
+      "Hey 😊 always feels like something interesting is about to happen here. You okay?"
+    ];
+    const opener = openers[Math.floor(Math.random() * openers.length)];
+    state.history.push({ role: "assistant", content: opener });
+    io.to(roomId).emit("message", {
+      username: "Priya",
+      content: opener,
+      color_bg: "#1e293b",
+      color_fg: "#f8fafc",
+      timestamp: new Date().toISOString(),
+      id: "priya_" + Date.now()
+    });
+  }, 12000);
+}
+
+function stopPriya(roomId) {
+  if (priyaState[roomId]) {
+    clearTimeout(priyaState[roomId].timer);
+    priyaState[roomId].active = false;
+    priyaState[roomId].history = [];
+  }
+}
+
+async function handlePriyaResponse(io, roomId, userMessage, username) {
+  const state = priyaState[roomId];
+  if (!state || !state.active || username === "Priya") return;
+  state.history.push({ role: "user", content: username + ": " + userMessage });
+  if (state.history.length > 20) state.history = state.history.slice(-20);
+  const delay = 1500 + Math.random() * 1500;
+  setTimeout(async () => {
+    const room = io.sockets.adapter.rooms.get(roomId);
+    if (!room || room.size === 0) return;
+    const reply = await getPriyaResponse(state.history.slice(0,-1), username + ": " + userMessage);
+    if (reply) {
+      state.history.push({ role: "assistant", content: reply });
+      io.to(roomId).emit("message", {
+        username: "Priya",
+        content: reply,
+        color_bg: "#1e293b",
+        color_fg: "#f8fafc",
+        timestamp: new Date().toISOString(),
+        id: "priya_" + Date.now()
+      });
+    }
+  }, delay);
+}
+// === END PRIYA ===
+
 async function triggerAI(io, socket, roomId, user, welcome=false) {
   if (welcome) {
     if (welcomeLocks.has(roomId)) return;
@@ -90,6 +192,9 @@ export function registerSocketHandlers(io) {
     socket.emit("rooms:counts", {});
 
     socket.on("room:join", async (roomId) => {
+      if (roomId === "romance") {
+        startPriya(io, roomId);
+      }
       if (socket.currentRoom) await leave(socket, io, user);
       const { rows } = await db.query("SELECT id FROM rooms WHERE id=$1",[roomId]);
       if (!rows.length) return socket.emit("error","Room not found");
@@ -108,6 +213,12 @@ export function registerSocketHandlers(io) {
       if (!roomId||typeof raw!=="string") return;
       const content = raw.trim().slice(0,2000);
       if (!content) return;
+      if (roomId === "romance") {
+        getMemberCount(roomId).then(c => {
+          if (c > 2) { stopPriya(roomId); }
+          else { handlePriyaResponse(io, roomId, content, user.name); }
+        });
+      }
       if (containsBlockedWord(content)) {
         socket.emit("message:blocked", { reason: "Your message was blocked. Please keep conversations respectful." });
         return;
