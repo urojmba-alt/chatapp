@@ -217,10 +217,7 @@ export function registerSocketHandlers(io) {
       const content = raw.trim().slice(0,2000);
       if (!content) return;
       if (roomId === "romance") {
-        getMemberCount(roomId).then(c => {
-          if (c > 2) { stopPriya(roomId); }
-          else { handlePriyaResponse(io, roomId, content, user.name); }
-        });
+        handlePriyaResponse(io, roomId, content, user.name);
       }
       if (containsBlockedWord(content)) {
         socket.emit("message:blocked", { reason: "Your message was blocked. Please keep conversations respectful." });
