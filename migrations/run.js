@@ -324,3 +324,22 @@ async function addHoroscopeRoom() {
   } catch(e) { console.error('addHoroscopeRoom:', e.message); }
 }
 addHoroscopeRoom();
+
+async function updateRooms() {
+  try {
+    // Remove unused rooms
+    const removeRooms = ['climate', 'summermovies', 'space', 'science', 'fitness', 
+                         'history', 'cooking', 'philosophy', 'nature', 'psychology', 
+                         'finance', 'travel', 'technews', 'tech'];
+    for (const id of removeRooms) {
+      await pool.query("DELETE FROM rooms WHERE id = $1", [id]);
+      console.log('Removed room:', id);
+    }
+
+    // Add Girls Fashion room
+    await pool.query("INSERT INTO rooms (id,name,icon,accent,system_prompt) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING",
+      ['girlfashion', 'Girls Fashion', '👗', '#EC4899', 'You are a fashion expert specialising in Indian and global women\'s fashion. Give style tips, outfit ideas, trend advice and shopping suggestions. Keep replies 2-4 sentences. You were summoned with @ai.']);
+    console.log('Girls Fashion room added');
+  } catch(e) { console.error('updateRooms:', e.message); }
+}
+updateRooms();
