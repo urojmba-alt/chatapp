@@ -87,6 +87,7 @@ function startPriya(io, roomId) {
   console.log("[Priya] Timer set for room:", roomId);
   state.timer = setTimeout(async () => {
     console.log("[Priya] Timer fired for room:", roomId);
+    console.log("[Priya] Rooms available:", Array.from(io.sockets.adapter.rooms.keys()));
     state.active = true;
     const openers = [
       "Hey! Finally someone here 😊 how\'s your day going?",
