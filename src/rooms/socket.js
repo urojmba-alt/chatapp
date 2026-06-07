@@ -84,6 +84,7 @@ function startPriya(io, roomId) {
   const state = priyaState[roomId];
   if (state.active) return;
 
+  console.log("[Priya] Timer set for room:", roomId);
   state.timer = setTimeout(async () => {
     const room = io.sockets.adapter.rooms.get(roomId);
     if (!room || room.size === 0) return;
@@ -193,6 +194,7 @@ export function registerSocketHandlers(io) {
 
     socket.on("room:join", async (roomId) => {
       if (roomId === "romance") {
+        console.log("[Priya] Starting for romance room, user:", user.name);
         startPriya(io, roomId);
       }
       if (socket.currentRoom) await leave(socket, io, user);
