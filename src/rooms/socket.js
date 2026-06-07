@@ -130,6 +130,7 @@ async function handlePriyaResponse(io, roomId, userMessage, username) {
     const room = io.sockets.adapter.rooms.get(roomId);
     if (!room || room.size === 0) return;
     const reply = await getPriyaResponse(state.history.slice(0,-1), username + ": " + userMessage);
+    console.log("[Priya] reply received:", reply ? reply.slice(0,50) : "NULL");
     if (reply) {
       state.history.push({ role: "assistant", content: reply });
       io.to(roomId).emit("message:new", {
