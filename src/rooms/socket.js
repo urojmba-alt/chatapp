@@ -56,7 +56,8 @@ const priyaState = {};
 
 async function getPriyaResponse(history, userMessage) {
   try {
-    const messages = [...history, { role: "user", content: userMessage }];
+    // Build clean alternating messages for Anthropic
+    const messages = [{ role: "user", content: userMessage }];
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -72,6 +73,7 @@ async function getPriyaResponse(history, userMessage) {
       })
     });
     const data = await response.json();
+    console.log("[Priya] API response:", JSON.stringify(data).slice(0,200));
     return data.content?.[0]?.text || null;
   } catch(err) {
     console.error("Priya error:", err);
