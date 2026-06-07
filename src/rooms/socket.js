@@ -120,7 +120,9 @@ function stopPriya(roomId) {
 
 async function handlePriyaResponse(io, roomId, userMessage, username) {
   const state = priyaState[roomId];
+  console.log("[Priya] handlePriya called, state:", state ? state.active : "NO STATE", "user:", username);
   if (!state || !state.active || username === "Priya") return;
+  console.log("[Priya] generating reply for:", userMessage);
   state.history.push({ role: "user", content: username + ": " + userMessage });
   if (state.history.length > 20) state.history = state.history.slice(-20);
   const delay = 1500 + Math.random() * 1500;
