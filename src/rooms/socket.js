@@ -98,13 +98,14 @@ function startPriya(io, roomId) {
     ];
     const opener = openers[Math.floor(Math.random() * openers.length)];
     state.history.push({ role: "assistant", content: opener });
-    io.to(roomId).emit("message", {
-      username: "Priya",
+    console.log("[Priya] Emitting opener to room:", roomId);
+    io.to(roomId).emit("message:new", {
+      id: "priya_" + Date.now(),
+      role: "assistant",
+      sender_name: "Priya",
+      color: "#f472b6",
       content: opener,
-      color_bg: "#1e293b",
-      color_fg: "#f8fafc",
-      timestamp: new Date().toISOString(),
-      id: "priya_" + Date.now()
+      created_at: new Date().toISOString()
     });
   }, 5000);
 }
@@ -129,13 +130,13 @@ async function handlePriyaResponse(io, roomId, userMessage, username) {
     const reply = await getPriyaResponse(state.history.slice(0,-1), username + ": " + userMessage);
     if (reply) {
       state.history.push({ role: "assistant", content: reply });
-      io.to(roomId).emit("message", {
-        username: "Priya",
+      io.to(roomId).emit("message:new", {
+        id: "priya_" + Date.now(),
+        role: "assistant",
+        sender_name: "Priya",
+        color: "#f472b6",
         content: reply,
-        color_bg: "#1e293b",
-        color_fg: "#f8fafc",
-        timestamp: new Date().toISOString(),
-        id: "priya_" + Date.now()
+        created_at: new Date().toISOString()
       });
     }
   }, delay);
