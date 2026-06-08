@@ -66,6 +66,7 @@ router.get('/news/:roomId', async (req, res) => {
     careers: 'https://www.theguardian.com/careers/rss',
     horoscope: 'https://feeds.feedburner.com/astrologyzone',
     relationships: 'https://hollywoodlife.com/feed/',
+    girlfashion: 'https://www.vogue.in/feed',
     makefriends: 'https://pagesix.com/feed/',
     heartbroken: 'https://hollywoodlife.com/feed/',
     history: 'https://www.theguardian.com/education/history/rss',
