@@ -51,18 +51,18 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 // News proxy endpoint
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
-    romance: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    relationships: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    heartbroken: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    makefriends: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    girlfashion: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    worldcup2026: 'https://www.hindustantimes.com/rss/sports/rssfeed.xml',
-    stockmarket: 'https://www.hindustantimes.com/rss/business/rssfeed.xml',
-    tech: 'https://www.hindustantimes.com/rss/technology/rssfeed.xml',
-    movies: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    music: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
-    horoscope: 'https://www.hindustantimes.com/rss/astrology/rssfeed.xml',
-    careers: 'https://www.hindustantimes.com/rss/business/rssfeed.xml',
+    romance: 'https://www.thehindu.com/entertainment/rssfeed.xml',
+    relationships: 'https://www.thehindu.com/entertainment/rssfeed.xml',
+    heartbroken: 'https://www.thehindu.com/entertainment/rssfeed.xml',
+    makefriends: 'https://www.thehindu.com/feeder/default.rss',
+    girlfashion: 'https://www.thehindu.com/entertainment/rssfeed.xml',
+    worldcup2026: 'https://www.thehindu.com/sport/rssfeed.xml',
+    stockmarket: 'https://www.thehindu.com/business/rssfeed.xml',
+    tech: 'https://www.thehindu.com/sci-tech/technology/rssfeed.xml',
+    movies: 'https://www.thehindu.com/entertainment/movies/rssfeed.xml',
+    music: 'https://www.thehindu.com/entertainment/music/rssfeed.xml',
+    horoscope: 'https://www.thehindu.com/feeder/default.rss',
+    careers: 'https://www.thehindu.com/business/rssfeed.xml',
   };
   const feed = feeds[req.params.roomId];
   if (!feed) return res.json([]);
