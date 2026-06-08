@@ -51,18 +51,18 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 // News proxy endpoint
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
-    romance: 'https://www.thehindu.com/entertainment/rssfeed.xml',
-    relationships: 'https://www.thehindu.com/entertainment/rssfeed.xml',
-    heartbroken: 'https://www.thehindu.com/entertainment/rssfeed.xml',
-    makefriends: 'https://www.thehindu.com/feeder/default.rss',
-    girlfashion: 'https://www.thehindu.com/entertainment/rssfeed.xml',
-    worldcup2026: 'https://www.thehindu.com/sport/rssfeed.xml',
-    stockmarket: 'https://www.thehindu.com/business/rssfeed.xml',
-    tech: 'https://www.thehindu.com/sci-tech/technology/rssfeed.xml',
-    movies: 'https://www.thehindu.com/entertainment/movies/rssfeed.xml',
-    music: 'https://www.thehindu.com/entertainment/music/rssfeed.xml',
-    horoscope: 'https://www.thehindu.com/feeder/default.rss',
-    careers: 'https://www.thehindu.com/business/rssfeed.xml',
+    romance: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
+    relationships: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
+    heartbroken: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
+    makefriends: 'https://www.theguardian.com/world/india/rss',
+    girlfashion: 'https://www.theguardian.com/fashion/rss',
+    worldcup2026: 'https://feeds.bbci.co.uk/sport/football/rss.xml',
+    stockmarket: 'https://feeds.bbci.co.uk/news/business/rss.xml',
+    tech: 'https://feeds.bbci.co.uk/news/technology/rss.xml',
+    movies: 'https://www.theguardian.com/film/rss',
+    music: 'https://www.theguardian.com/music/rss',
+    horoscope: 'https://www.theguardian.com/lifeandstyle/rss',
+    careers: 'https://www.theguardian.com/careers/rss',
   };
   const feed = feeds[req.params.roomId];
   if (!feed) return res.json([]);
