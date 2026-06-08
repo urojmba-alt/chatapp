@@ -77,7 +77,7 @@ router.get('/news/:roomId', async (req, res) => {
     for (const m of itemMatches) {
       const item = m[1];
       const title = item.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1]?.trim();
-      const link = item.match(/<link[^>]*>(.*?)<\/link>/)?.[1]?.trim() || item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1]?.trim();
+      const link = item.match(/<link[^>]*href=["'](.*?)["']/)?.[1]?.trim() || item.match(/<link[^>]*>(.*?)<\/link>/)?.[1]?.trim() || item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1]?.trim();
       if (title && link && link.startsWith('http')) items.push({ title, link });
       if (items.length >= 3) break;
     }
