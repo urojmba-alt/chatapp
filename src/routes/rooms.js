@@ -80,7 +80,10 @@ router.get('/news/:roomId', async (req, res) => {
         || item.match(/<guid[^>]*>(https?[^<]+)<\/guid>/)?.[1]?.trim();
       if (title && link) {
         title = title.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#039;/g,"'").replace(/&quot;/g,'"');
-        items.push({ title, link });
+        // Filter out ads and sponsored content
+        const isAd = /sponsor|adverti|partner|promo|brand|paid|native/i.test(title + link);
+        const isPR = /pr-release|press-release|brandhub/i.test(link);
+        if (!isAd && !isPR) items.push({ title, link });
       }
       if (items.length >= 3) break;
     }
