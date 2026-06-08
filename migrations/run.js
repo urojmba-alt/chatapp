@@ -347,6 +347,8 @@ updateRooms();
 async function addProfileFields() {
   try {
     await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS age INTEGER");
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS location VARCHAR(50)");
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT");
     await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS looking_for VARCHAR(20)");
     await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10)");
     console.log('Profile fields added');
