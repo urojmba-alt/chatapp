@@ -51,18 +51,18 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 // News proxy endpoint
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
-    romance: 'https://timesofindia.indiatimes.com/rssfeeds/2886704.cms',
-    relationships: 'https://timesofindia.indiatimes.com/rssfeeds/2886704.cms',
-    heartbroken: 'https://timesofindia.indiatimes.com/rssfeeds/2886704.cms',
-    makefriends: 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms',
-    girlfashion: 'https://timesofindia.indiatimes.com/rssfeeds/2886704.cms',
-    worldcup2026: 'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms',
-    stockmarket: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
-    tech: 'https://timesofindia.indiatimes.com/rssfeeds/66949542.cms',
-    movies: 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms',
-    music: 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms',
-    horoscope: 'https://timesofindia.indiatimes.com/rssfeeds/2886704.cms',
-    careers: 'https://economictimes.indiatimes.com/jobs/rssfeeds/107116.cms',
+    romance: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    relationships: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    heartbroken: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    makefriends: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    girlfashion: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    worldcup2026: 'https://www.hindustantimes.com/rss/sports/rssfeed.xml',
+    stockmarket: 'https://www.hindustantimes.com/rss/business/rssfeed.xml',
+    tech: 'https://www.hindustantimes.com/rss/technology/rssfeed.xml',
+    movies: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    music: 'https://www.hindustantimes.com/rss/entertainment/rssfeed.xml',
+    horoscope: 'https://www.hindustantimes.com/rss/astrology/rssfeed.xml',
+    careers: 'https://www.hindustantimes.com/rss/business/rssfeed.xml',
   };
   const feed = feeds[req.params.roomId];
   if (!feed) return res.json([]);
