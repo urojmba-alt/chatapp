@@ -343,3 +343,13 @@ async function updateRooms() {
   } catch(e) { console.error('updateRooms:', e.message); }
 }
 updateRooms();
+
+async function addProfileFields() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS age INTEGER");
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS looking_for VARCHAR(20)");
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10)");
+    console.log('Profile fields added');
+  } catch(e) { console.error('addProfileFields:', e.message); }
+}
+addProfileFields();
