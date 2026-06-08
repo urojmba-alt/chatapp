@@ -69,6 +69,7 @@ router.get('/news/:roomId', async (req, res) => {
   try {
     const r = await fetch(feed, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/rss+xml,application/xml,text/xml' }, signal: AbortSignal.timeout(5000) });
     const xml = await r.text();
+    console.log('[news] roomId:', req.params.roomId, 'status:', r.status, 'length:', xml.length, 'preview:', xml.slice(0,100));
     // Simple XML parser for RSS items
     const items = [];
     const tagName = xml.includes('<entry') ? 'entry' : 'item';
