@@ -69,18 +69,22 @@ router.get('/news/:roomId', async (req, res) => {
   try {
     const r = await fetch(feed, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/rss+xml,application/xml,text/xml' }, signal: AbortSignal.timeout(5000) });
     const xml = await r.text();
-    console.log('[news] roomId:', req.params.roomId, 'status:', r.status, 'length:', xml.length, 'preview:', xml.slice(0,100));
-    // Simple XML parser for RSS items
+    console.log('[news] status:', r.status, 'length:', xml.length);
     const items = [];
-    const tagName = xml.includes('<entry') ? 'entry' : 'item';
-    const itemMatches = xml.matchAll(new RegExp(`<${tagName}[^>]*>([\s\S]*?)<\/${tagName}>`, 'g'));
-    for (const m of itemMatches) {
-      const item = m[1];
-      const title = item.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1]?.trim();
-      const link = item.match(/<link[^>]*href=["'](.*?)["']/)?.[1]?.trim() || item.match(/<link[^>]*>(.*?)<\/link>/)?.[1]?.trim() || item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1]?.trim();
-      if (title && link && link.startsWith('http')) items.push({ title, link });
+    const rawItems = xml.match(/<item[\s\S]*?<\/item>/g) || xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
+    for (const item of rawItems) {
+      let title = item.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/)?.[1]?.trim()
+        || item.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1]?.trim();
+      let link = item.match(/<link[^>]*href=["'](https?[^"']+)["']/)?.[1]?.trim()
+        || item.match(/<link[^>]*>(https?[^<]+)<\/link>/)?.[1]?.trim()
+        || item.match(/<guid[^>]*>(https?[^<]+)<\/guid>/)?.[1]?.trim();
+      if (title && link) {
+        title = title.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#039;/g,"'").replace(/&quot;/g,'"');
+        items.push({ title, link });
+      }
       if (items.length >= 3) break;
     }
+    console.log('[news] items found:', items.length);
     res.json(items);
   } catch(e) { console.log('[news error]', e.message); res.json([]); }
 });
