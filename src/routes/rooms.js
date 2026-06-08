@@ -69,7 +69,6 @@ router.get('/news/:roomId', async (req, res) => {
   try {
     const r = await fetch(feed, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/rss+xml,application/xml,text/xml' }, signal: AbortSignal.timeout(5000) });
     const xml = await r.text();
-    console.log('[news] status:', r.status, 'length:', xml.length);
     const items = [];
     const rawItems = xml.match(/<item[\s\S]*?<\/item>/g) || xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
     for (const item of rawItems) {
@@ -83,11 +82,11 @@ router.get('/news/:roomId', async (req, res) => {
         // Filter out ads and sponsored content
         const isAd = /sponsor|adverti|partner|promo|brand|paid|native/i.test(title + link);
         const isPR = /pr-release|press-release|brandhub/i.test(link);
+        link = link.replace(/&amp;/g, '&');
         if (!isAd && !isPR) items.push({ title, link });
       }
       if (items.length >= 3) break;
     }
-    console.log('[news] items found:', items.length);
     res.json(items);
   } catch(e) { console.log('[news error]', e.message); res.json([]); }
 });
