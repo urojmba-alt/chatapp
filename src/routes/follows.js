@@ -58,7 +58,7 @@ router.get("/profile/:username", async (req, res) => {
   try {
     const me = await getUser(req);
     const { rows } = await db.query(
-      "SELECT id, username, created_at, age, location, bio, looking_for, gender FROM users WHERE username=$1",
+      "SELECT id, username, created_at FROM users WHERE username=$1",
       [req.params.username]
     );
     if (!rows.length) return res.status(404).json({ error: "User not found" });
@@ -72,12 +72,7 @@ router.get("/profile/:username", async (req, res) => {
       id: u.id,
       username: u.username,
       created_at: u.created_at,
-      age: u.age,
-      location: u.location,
-      bio: u.bio,
-      looking_for: u.looking_for,
-      gender: u.gender,
-      msg_count: parseInt(msgCount.rows[0].count),
+msg_count: parseInt(msgCount.rows[0].count),
       post_count: parseInt(postCount.rows[0].count),
       is_following: isFollowing.rows.length > 0,
       is_me: me?.id === u.id
