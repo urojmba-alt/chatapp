@@ -14,6 +14,7 @@ import authRouter from "./routes/auth.js";
 import roomsRouter from "./routes/rooms.js";
 import adminRouter from "./routes/admin.js";
 import postsRouter from "./routes/posts.js";
+import followsRouter from "./routes/follows.js";
 import { requireAuthSocket } from "./middleware/auth.js";
 import { registerSocketHandlers } from "./rooms/socket.js";
 
@@ -68,6 +69,7 @@ app.use("/api/auth",
   authRouter
 );
 app.use("/api/rooms", roomsRouter);
+app.use("/api/follows", followsRouter);
 
 app.use("/api/admin", adminRouter);
 app.use("/api/posts", postsRouter);
