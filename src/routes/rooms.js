@@ -51,9 +51,9 @@ router.get("/:id/messages", requireAuth, async (req, res) => {
 // News proxy endpoint
 router.get('/news/:roomId', async (req, res) => {
   const feeds = {
-    romance: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
+    romance: 'https://www.theguardian.com/lifeandstyle/love-and-sex/rss',
     relationships: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
-    heartbroken: 'https://www.theguardian.com/lifeandstyle/relationships/rss',
+    heartbroken: 'https://www.theguardian.com/lifeandstyle/health-and-wellbeing/rss',
     makefriends: 'https://www.theguardian.com/world/india/rss',
     girlfashion: 'https://www.theguardian.com/fashion/rss',
     worldcup2026: 'https://feeds.bbci.co.uk/sport/football/rss.xml',
