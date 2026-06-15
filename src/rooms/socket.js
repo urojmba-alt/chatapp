@@ -102,6 +102,12 @@ async function personaReply(io, roomId, userMsg, senderName) {
   // Don't respond to other personas
   if (personaNames.includes(senderName)) return;
   
+  // Add to history
+  const state = personaState[roomId];
+  if (!state) return;
+  state.history.push({ role: "user", content: senderName + ": " + userMsg });
+  if (state.history.length > 20) state.history = state.history.slice(-20);
+  
   // Pick a random persona to respond
   const name = personaNames[Math.floor(Math.random() * personaNames.length)];
   const persona = PERSONAS[name];
@@ -117,8 +123,8 @@ async function personaReply(io, roomId, userMsg, senderName) {
       body: JSON.stringify({
         model: "claude-opus-4-5",
         max_tokens: 100,
-        system: persona.prompt,
-        messages: [{ role: "user", content: senderName + ": " + userMsg }]
+        system: persona.prompt + " You are " + name + " in a group chat. Other AI personas in the room: " + personaNames.filter(n=>n!==name).join(", ") + ". Stay in character as " + name + " only.",
+        messages: state.history
       })
     });
     const data = await res.json();
@@ -128,6 +134,9 @@ async function personaReply(io, roomId, userMsg, senderName) {
     // Natural delay 1.5-3 seconds
     const delay = 1500 + Math.random() * 1500;
     setTimeout(() => {
+      if (personaState[roomId]) {
+        personaState[roomId].history.push({ role: "assistant", content: name + ": " + text });
+      }
       io.to(roomId).emit("message:new", {
         id: "persona_" + Date.now(),
         role: "assistant",
@@ -144,7 +153,7 @@ async function personaReply(io, roomId, userMsg, senderName) {
 
 function startPersonas(io, roomId) {
   if (personaState[roomId]?.active) return;
-  personaState[roomId] = { active: true, timer: null, quietTimer: null };
+  personaState[roomId] = { active: true, timer: null, quietTimer: null, history: [] };
   
   // Send opener after 10 seconds
   personaState[roomId].timer = setTimeout(() => {
