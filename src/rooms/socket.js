@@ -108,8 +108,12 @@ async function personaReply(io, roomId, userMsg, senderName) {
   state.history.push({ role: "user", content: senderName + ": " + userMsg });
   if (state.history.length > 20) state.history = state.history.slice(-20);
   
-  // Pick a random persona to respond
-  const name = personaNames[Math.floor(Math.random() * personaNames.length)];
+  // Check if a specific persona is tagged
+  const tagMatch = userMsg.match(/@([A-Za-z]+)/);
+  const taggedName = tagMatch ? personaNames.find(n => n.toLowerCase() === tagMatch[1].toLowerCase()) : null;
+  
+  // Use tagged persona or pick random
+  const name = taggedName || personaNames[Math.floor(Math.random() * personaNames.length)];
   const persona = PERSONAS[name];
   
   try {
