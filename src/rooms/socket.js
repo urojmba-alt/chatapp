@@ -194,7 +194,7 @@ function startQuietTimer(io, roomId) {
     });
     
     startQuietTimer(io, roomId);
-  }, 3 * 60 * 1000); // 3 minutes
+  }, 30 * 1000); // 30 seconds
 }
 
 function stopPersonas(roomId) {
