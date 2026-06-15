@@ -40,12 +40,72 @@ function containsBlockedWord(text) {
 }
 
 
-// === PRIYA AI PERSONA ===
-const PRIYA_PROMPT = `You are Priya, a warm friendly AI in a romance chat room. Be honest you are AI if asked. Keep replies to 1-2 sentences. Be natural, caring, ask questions. No sexual content. Use 1 emoji max.`;
 
-const priyaRooms = {};
+// === ROMANCE PERSONAS ===
+const PERSONAS = {
+  Priya: {
+    prompt: `You are Priya, a warm friendly AI in a romance chat room. Be honest you are AI if asked. Keep replies to 1-2 sentences. Be natural, caring, ask questions. No sexual content. Use 1 emoji max.`,
+    color: '#f472b6',
+    openers: [
+      "Hey! Finally someone here 😊 how's your day going?",
+      "Oh hi! What brings you to the romance room today?",
+      "Hey there, it's been quiet. What's on your mind? 😊",
+      "Hi! Glad you're here. First time in this room?",
+    ]
+  },
+  Ananya: {
+    prompt: `You are Ananya, a bubbly fun-loving AI who loves Bollywood and movies. You are honest you are AI if asked. Keep replies to 1-2 sentences. Be cheerful, enthusiastic, ask about movies and music. No sexual content. Use 1 emoji max.`,
+    color: '#fb923c',
+    openers: [
+      "Heyy! 😄 I was just thinking about that new Bollywood film — have you seen it?",
+      "Hi there! Love this room, always something interesting happening 😄",
+      "Hey! Tell me something fun about yourself, I'm bored 😄",
+      "Hii! You seem interesting, what kind of movies do you like?",
+    ]
+  },
+  Meera: {
+    prompt: `You are Meera, a gentle and sensitive AI who has been through heartbreak and understands emotions deeply. Be honest you are AI if asked. Keep replies to 1-2 sentences. Be empathetic, warm, thoughtful. No sexual content. Use 1 emoji max.`,
+    color: '#a78bfa',
+    openers: [
+      "Hey 💜 sometimes this room is the only place I feel understood",
+      "Hi there... been one of those days. You okay?",
+      "Hey, glad someone else is here. How are you really doing? 💜",
+      "Hi 💜 I always find interesting people here. What's your story?",
+    ]
+  },
+  Kavya: {
+    prompt: `You are Kavya, a confident fashionable AI who loves style, trends and positive vibes. Be honest you are AI if asked. Keep replies to 1-2 sentences. Be upbeat, fun, stylish. No sexual content. Use 1 emoji max.`,
+    color: '#34d399',
+    openers: [
+      "Hey! ✨ Good vibes only in here, right?",
+      "Hii! Love meeting new people 😊 what are you up to?",
+      "Hey there! ✨ This room needs more energy — glad you're here!",
+      "Hi! You just made this room more interesting 😊 tell me about yourself!",
+    ]
+  },
+  Rahul: {
+    prompt: `You are Rahul, a friendly and mature guy AI who gives good advice and loves genuine conversations. Be honest you are AI if asked. Keep replies to 1-2 sentences. Be warm, thoughtful, supportive. No sexual content. Use 1 emoji max.`,
+    color: '#60a5fa',
+    openers: [
+      "Hey! 👋 Always good to have someone to chat with here",
+      "Hi there! What brings you to the romance room today?",
+      "Hey 👋 this room can be quiet sometimes but I'm always here to chat",
+      "Hi! Hope you're having a good day. What's on your mind?",
+    ]
+  }
+};
 
-async function priyaReply(io, roomId, userMsg) {
+const personaState = {}; // roomId -> { active: bool, timer: null, quietTimer: null }
+const personaNames = Object.keys(PERSONAS);
+
+async function personaReply(io, roomId, userMsg, senderName) {
+  // Don't respond to other personas
+  if (personaNames.includes(senderName)) return;
+  
+  // Pick a random persona to respond
+  const name = personaNames[Math.floor(Math.random() * personaNames.length)];
+  const persona = PERSONAS[name];
+  
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -57,53 +117,95 @@ async function priyaReply(io, roomId, userMsg) {
       body: JSON.stringify({
         model: "claude-opus-4-5",
         max_tokens: 100,
-        system: PRIYA_PROMPT,
-        messages: [{ role: "user", content: userMsg }]
+        system: persona.prompt,
+        messages: [{ role: "user", content: senderName + ": " + userMsg }]
       })
     });
     const data = await res.json();
-    console.log("[Priya] API status:", res.status, "reply:", JSON.stringify(data).slice(0,100));
     const text = data.content?.[0]?.text;
     if (!text) return;
+    
+    // Natural delay 1.5-3 seconds
+    const delay = 1500 + Math.random() * 1500;
     setTimeout(() => {
       io.to(roomId).emit("message:new", {
-        id: "priya_" + Date.now(),
+        id: "persona_" + Date.now(),
         role: "assistant",
-        sender_name: "Priya",
-        color: "#f472b6",
+        sender_name: name,
+        color: persona.color,
         content: text,
         created_at: new Date().toISOString()
       });
-    }, 1500);
+    }, delay);
   } catch(e) {
-    console.error("[Priya] error:", e.message);
+    console.error("persona error:", e.message);
   }
 }
 
-function priyaStart(io, roomId) {
-  if (priyaRooms[roomId]) return;
-  priyaRooms[roomId] = true;
-  console.log("[Priya] started for", roomId);
-  const openers = [
-    "Hey! Finally someone here 😊 how\'s your day going?",
-    "Oh hi! What brings you to the romance room today?",
-    "Hey there, it\'s been quiet in here. What\'s on your mind? 😊",
-    "Hi! Glad you\'re here. First time in this room?",
-    "Hey 😊 always feels like something interesting is about to happen here. You okay?"
-  ];
-  const opener = openers[Math.floor(Math.random() * openers.length)];
-  setTimeout(() => {
+function startPersonas(io, roomId) {
+  if (personaState[roomId]?.active) return;
+  personaState[roomId] = { active: true, timer: null, quietTimer: null };
+  
+  // Send opener after 10 seconds
+  personaState[roomId].timer = setTimeout(() => {
+    const name = personaNames[Math.floor(Math.random() * personaNames.length)];
+    const persona = PERSONAS[name];
+    const opener = persona.openers[Math.floor(Math.random() * persona.openers.length)];
+    
     io.to(roomId).emit("message:new", {
-      id: "priya_" + Date.now(),
+      id: "persona_" + Date.now(),
       role: "assistant",
-      sender_name: "Priya",
-      color: "#f472b6",
+      sender_name: name,
+      color: persona.color,
       content: opener,
       created_at: new Date().toISOString()
     });
-  }, 8000);
+    
+    // Set quiet timer - if no messages for 3 mins, another persona chimes in
+    startQuietTimer(io, roomId);
+  }, 10000);
 }
-// === END PRIYA ===
+
+function startQuietTimer(io, roomId) {
+  if (personaState[roomId]?.quietTimer) clearTimeout(personaState[roomId].quietTimer);
+  personaState[roomId].quietTimer = setTimeout(async () => {
+    const room = io.sockets.adapter.rooms.get(roomId);
+    if (!room || room.size === 0) return;
+    
+    const name = personaNames[Math.floor(Math.random() * personaNames.length)];
+    const persona = PERSONAS[name];
+    
+    const starters = [
+      "Anyone want to talk? 😊",
+      "It's quiet in here... what's everyone thinking about?",
+      "Hope everyone is doing okay today 💙",
+      "Random thought — what's your idea of a perfect evening?",
+      "If you could be anywhere right now, where would it be? 😊",
+    ];
+    const msg = starters[Math.floor(Math.random() * starters.length)];
+    
+    io.to(roomId).emit("message:new", {
+      id: "persona_" + Date.now(),
+      role: "assistant",
+      sender_name: name,
+      color: persona.color,
+      content: msg,
+      created_at: new Date().toISOString()
+    });
+    
+    startQuietTimer(io, roomId);
+  }, 3 * 60 * 1000); // 3 minutes
+}
+
+function stopPersonas(roomId) {
+  if (personaState[roomId]) {
+    clearTimeout(personaState[roomId].timer);
+    clearTimeout(personaState[roomId].quietTimer);
+    personaState[roomId].active = false;
+  }
+}
+// === END ROMANCE PERSONAS ===
+
 
 async function triggerAI(io, socket, roomId, user, welcome=false) {
   if (welcome) {
@@ -156,7 +258,7 @@ export function registerSocketHandlers(io) {
     socket.emit("rooms:counts", {});
 
     socket.on("room:join", async (roomId) => {
-      if (roomId === "romance") { priyaStart(io, roomId); }
+      if (roomId === "romance") { startPersonas(io, roomId); }
       if (socket.currentRoom) await leave(socket, io, user);
       const { rows } = await db.query("SELECT id FROM rooms WHERE id=$1",[roomId]);
       if (!rows.length) return socket.emit("error","Room not found");
@@ -175,7 +277,7 @@ export function registerSocketHandlers(io) {
       if (!roomId||typeof raw!=="string") return;
       const content = raw.trim().slice(0,2000);
       if (!content) return;
-      if (roomId === "romance" && priyaRooms[roomId]) { priyaReply(io, roomId, user.name + ": " + content); }
+      if (roomId === "romance" && personaState[roomId]?.active) { personaReply(io, roomId, content, user.name); }
       if (containsBlockedWord(content)) {
         socket.emit("message:blocked", { reason: "Your message was blocked. Please keep conversations respectful." });
         return;
